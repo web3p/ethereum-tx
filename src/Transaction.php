@@ -25,6 +25,7 @@ class Transaction implements ArrayAccess
      * @var array
      */
     protected $map = [
+        'from' => -1,
         'nonce' => 0,
         'gasPrice' => 1,
         'gasLimit' => 2,
@@ -33,8 +34,9 @@ class Transaction implements ArrayAccess
         'value' => 4,
         'data' => 5,
         'chainId' => 6,
-        // 'r' => 7,
-        // 's' => 8
+        // 'v' => 6,
+        'r' => 7,
+        's' => 8
     ];
 
     /**

@@ -25,6 +25,7 @@
     },
     "require": {
         "web3p/rlp": "dev-master",
-        "web3p/secp256k1": "dev-master"
+        "web3p/secp256k1": "dev-master",
+        "kornrunner/keccak": "dev-master"
     }
 }

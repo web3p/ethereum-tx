@@ -13,6 +13,7 @@ namespace EthereumTx;
 
 use InvalidArgumentException;
 use RuntimeException;
+use kornrunner\Keccak;
 use RLP\RLP;
 use Secp256k1\Secp256k1;
 use ArrayAccess;
@@ -190,6 +191,26 @@ class Transaction implements ArrayAccess
     public function getTxData()
     {
         return $this->txData;
+    }
+
+    /**
+     * sha3
+     * keccak256
+     * 
+     * @param string $value
+     * @return string
+     */
+    public function sha3($value)
+    {
+        if (!is_string($value)) {
+            throw new InvalidArgumentException('The value to sha3 function must be string.');
+        }
+        $hash = Keccak::hash($value, 256);
+
+        if ($hash === $this::SHA3_NULL_HASH) {
+            return null;
+        }
+        return $hash;
     }
 
     /**

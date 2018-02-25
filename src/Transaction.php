@@ -121,6 +121,16 @@ class Transaction implements ArrayAccess
     }
 
     /**
+     * toString
+     * 
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->hash(false);
+    }
+
+    /**
      * offsetSet
      * 
      * @param string $offset
@@ -220,7 +230,22 @@ class Transaction implements ArrayAccess
      */
     public function serialize()
     {
-        return $this->rlp->encode($this->txData)->toString('hex');
+        $v = 37;
+
+        if (isset($this->chainId)) {
+            $v = (int) $this->chainId * 2 + 35;
+        }
+        // if (!isset($this->v)) {
+            $this->v = $v;
+        // }
+        $txData = array_fill(0, 9, '');
+
+        foreach ($this->txData as $key => $data) {
+            if ($key >= 0) {
+                $txData[$key] = $data;
+            }
+        }
+        return $this->rlp->encode($txData)->toString('hex');
     }
 
     /**
@@ -240,5 +265,22 @@ class Transaction implements ArrayAccess
      */
     public function hash()
     {
+        // $v = 37;
+
+        // if (isset($this->chainId)) {
+        //     $v = (int) $this->chainId * 2 + 35;
+        // }
+        // if (!isset($this->v)) {
+        //     $this->v = $v;
+        // }
+        // $txData = array_fill(0, 9, '');
+
+        // foreach ($this->txData as $key => $data) {
+        //     if ($key >= 0) {
+        //         $txData[$key] = $data;
+        //     }
+        // }
+        $serializedTx = $this->serialize();
+        return $this->sha3($serializedTx);
     }
 }

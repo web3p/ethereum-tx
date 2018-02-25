@@ -20,12 +20,20 @@ use ArrayAccess;
 class Transaction implements ArrayAccess
 {
     /**
+     * SHA3_NULL_HASH
+     * 
+     * @const string
+     */
+    const SHA3_NULL_HASH = 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
+
+    /**
      * txData
      * 
      * @var array
      */
     protected $map = [
         'from' => -1,
+        'chainId' => -2,
         'nonce' => 0,
         'gasPrice' => 1,
         'gasLimit' => 2,
@@ -33,8 +41,7 @@ class Transaction implements ArrayAccess
         'to' => 3,
         'value' => 4,
         'data' => 5,
-        'chainId' => 6,
-        // 'v' => 6,
+        'v' => 6,
         'r' => 7,
         's' => 8
     ];
@@ -45,6 +52,20 @@ class Transaction implements ArrayAccess
      * @var array
      */
     protected $txData;
+
+    /**
+     * rlp
+     * 
+     * @var \RLP\RLP
+     */
+    protected $rlp;
+
+    /**
+     * secp256k1
+     * 
+     * @var \Secp256k1\Secp256k1
+     */
+    protected $secp256k1;
 
     /**
      * construct
@@ -61,6 +82,8 @@ class Transaction implements ArrayAccess
                 $this->txData[$txKey] = $data;
             }
         }
+        $this->rlp = new RLP;
+        $this->secp256k1 = new Secp256k1;
     }
 
     /**
@@ -170,19 +193,31 @@ class Transaction implements ArrayAccess
     }
 
     /**
+     * serialize
+     * 
+     * @return string
+     */
+    public function serialize()
+    {
+        return $this->rlp->encode($this->txData)->toString('hex');
+    }
+
+    /**
      * sign
      * 
      * @param string $privateKey
      * @return string
      */
-    public function sign($privateKey)
-    {}
+    public function sign(string $privateKey)
+    {
+    }
 
     /**
      * hash
-     * 
+     *
      * @return string
      */
-    protected function hash()
-    {}
+    public function hash()
+    {
+    }
 }

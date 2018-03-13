@@ -116,7 +116,7 @@ class TransactionTest extends TestCase
             'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
         ]);
 
-        $this->assertEquals('f852018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675258080', $transaction->serialize());
+        $this->assertEquals('f852018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675258080', $transaction->serialize()->toString('hex'));
 
         $transaction = new Transaction([
             'nonce' => '0x01',
@@ -129,7 +129,7 @@ class TransactionTest extends TestCase
             'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
         ]);
 
-        $this->assertEquals('f852018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675258080', $transaction->serialize());
+        $this->assertEquals('f852018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f0724456752b8080', $transaction->serialize()->toString('hex'));
     }
 
     /**
@@ -171,7 +171,7 @@ class TransactionTest extends TestCase
             'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
         ]);
 
-        $this->assertEquals('b82a38af3a3c68fb469b1922dae34d433199dcf742da019b2536617b9a57791b', $transaction->hash());
+        $this->assertEquals('710aee292b0f1749aaa0cfef67111e2f716afbdb475e7f250bdb80c6655b0a66', $transaction->hash());
 
         $transaction = new Transaction([
             'nonce' => '0x01',
@@ -184,7 +184,7 @@ class TransactionTest extends TestCase
             'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
         ]);
 
-        $this->assertEquals('b82a38af3a3c68fb469b1922dae34d433199dcf742da019b2536617b9a57791b', (string) $transaction);
+        $this->assertEquals('dd4238507087c6d354079ea5a4c8da7abde43252f0accf79601d0fa1a10300d8', (string) $transaction);
     }
 
     /**

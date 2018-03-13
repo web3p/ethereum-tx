@@ -231,13 +231,12 @@ class Transaction implements ArrayAccess
     public function serialize()
     {
         $v = 37;
+        $chainId = $this->offsetGet('chainId');
 
-        if (isset($this->chainId)) {
-            $v = (int) $this->chainId * 2 + 35;
+        if ($chainId) {
+            $v = (int) $chainId * 2 + 35;
         }
-        // if (!isset($this->v)) {
-            $this->v = $v;
-        // }
+        $this->offsetSet('v', $v);
         $txData = array_fill(0, 9, '');
 
         foreach ($this->txData as $key => $data) {
@@ -245,7 +244,7 @@ class Transaction implements ArrayAccess
                 $txData[$key] = $data;
             }
         }
-        return $this->rlp->encode($txData)->toString('hex');
+        return $this->rlp->encode($txData);
     }
 
     /**
@@ -265,22 +264,7 @@ class Transaction implements ArrayAccess
      */
     public function hash()
     {
-        // $v = 37;
-
-        // if (isset($this->chainId)) {
-        //     $v = (int) $this->chainId * 2 + 35;
-        // }
-        // if (!isset($this->v)) {
-        //     $this->v = $v;
-        // }
-        // $txData = array_fill(0, 9, '');
-
-        // foreach ($this->txData as $key => $data) {
-        //     if ($key >= 0) {
-        //         $txData[$key] = $data;
-        //     }
-        // }
-        $serializedTx = $this->serialize();
+        $serializedTx = $this->serialize()->toString('utf8');
         return $this->sha3($serializedTx);
     }
 }

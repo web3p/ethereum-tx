@@ -1,0 +1,31 @@
+{
+    "name": "web3p/ethereum-tx",
+    "description": "Ethereum transaction library in PHP.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "sc0Vu",
+            "email": "alk03073135@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require-dev": {
+        "phpunit/phpunit": "~6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "EthereumTx\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Test\\": "test/"
+        }
+    },
+    "require": {
+        "web3p/rlp": "dev-master",
+        "web3p/secp256k1": "dev-master",
+        "kornrunner/keccak": "dev-master"
+    }
+}

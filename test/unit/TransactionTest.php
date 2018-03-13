@@ -194,6 +194,15 @@ class TransactionTest extends TestCase
      */
     public function testSign()
     {
-        $this->assertTrue(true);
+        $transaction = new Transaction([
+            'nonce' => '0x01',
+            'from' => '0xb60e8dd61c5d32be8058bb8eb970870f07233155',
+            'to' => '0xd46e8dd67c5d32be8058bb8eb970870f07244567',
+            'gas' => '0x76c0',
+            'gasPrice' => '0x9184e72a000',
+            'value' => '0x9184e72a',
+            'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
+        ]);
+        $this->assertEquals('f892018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567525a08d8bfd01c48454b5b3fed2361cbd0e8c3282d5bd2e26762e4c9dfbe1ef35f325a06d6a5dc397934b5544835f34ff24263cbc00bdd516b6f0df3f29cdf6c779ccfb', $transaction->sign($this->testPrivateKey));
     }
 }

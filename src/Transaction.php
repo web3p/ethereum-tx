@@ -255,6 +255,17 @@ class Transaction implements ArrayAccess
      */
     public function sign(string $privateKey)
     {
+        $txHash = $this->hash();
+        $rlp = new RLP;
+        $secp256k1 = new Secp256k1;
+        $signature = $secp256k1->sign($txHash, $privateKey);
+        $r = $signature->getR();
+        $s = $signature->getS();
+
+        $this->offsetSet('r', '0x' . gmp_strval($r, 16));
+        $this->offsetSet('s', '0x' . gmp_strval($s, 16));
+
+        return $this->serialize()->toString('hex');
     }
 
     /**

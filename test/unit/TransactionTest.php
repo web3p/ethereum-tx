@@ -184,7 +184,7 @@ class TransactionTest extends TestCase
             'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
         ]);
 
-        $this->assertEquals('b82a38af3a3c68fb469b1922dae34d433199dcf742da019b2536617b9a57791b', (string) $transaction->hash());
+        $this->assertEquals('b82a38af3a3c68fb469b1922dae34d433199dcf742da019b2536617b9a57791b', (string) $transaction);
     }
 
     /**

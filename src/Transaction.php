@@ -9,13 +9,13 @@
  * @license MIT
  */
 
-namespace EthereumTx;
+namespace Web3p\EthereumTx;
 
 use InvalidArgumentException;
 use RuntimeException;
 use kornrunner\Keccak;
-use RLP\RLP;
-use Secp256k1\Secp256k1;
+use Web3p\RLP\RLP;
+use Web3p\Secp256k1\Secp256k1;
 use ArrayAccess;
 
 class Transaction implements ArrayAccess
@@ -57,14 +57,14 @@ class Transaction implements ArrayAccess
     /**
      * rlp
      * 
-     * @var \RLP\RLP
+     * @var \Web3p\RLP\RLP
      */
     protected $rlp;
 
     /**
      * secp256k1
      * 
-     * @var \Secp256k1\Secp256k1
+     * @var \Web3p\Secp256k1\Secp256k1
      */
     protected $secp256k1;
 

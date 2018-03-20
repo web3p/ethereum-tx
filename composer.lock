@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "df26fe6f6503a7a7b81051f13ed25810",
+    "content-hash": "d49eae17ce62b9584285247e680e8e4a",
     "packages": [
         {
             "name": "fgrosse/phpasn1",
@@ -77,7 +77,7 @@
         },
         {
             "name": "kornrunner/keccak",
-            "version": "dev-master",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kornrunner/php-keccak.git",
@@ -117,7 +117,7 @@
                 "keccak",
                 "sha-3"
             ],
-            "time": "2018-03-05 10:32:01"
+            "time": "2018-03-05T10:32:01+00:00"
         },
         {
             "name": "mdanter/ecc",
@@ -193,16 +193,16 @@
         },
         {
             "name": "web3p/rlp",
-            "version": "dev-master",
+            "version": "v0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/web3p/rlp.git",
-                "reference": "c4b0e84d3c96d4e920b7f627cb33d945b0d5e281"
+                "reference": "7cd33e17735515ab7d86a659406c325660b37840"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/web3p/rlp/zipball/c4b0e84d3c96d4e920b7f627cb33d945b0d5e281",
-                "reference": "c4b0e84d3c96d4e920b7f627cb33d945b0d5e281",
+                "url": "https://api.github.com/repos/web3p/rlp/zipball/7cd33e17735515ab7d86a659406c325660b37840",
+                "reference": "7cd33e17735515ab7d86a659406c325660b37840",
                 "shasum": ""
             },
             "require-dev": {
@@ -211,7 +211,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "RLP\\": "src/"
+                    "Web3p\\RLP\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -225,20 +225,20 @@
                 }
             ],
             "description": "Recursive Length Prefix Encoding in PHP.",
-            "time": "2018-03-08 09:24:09"
+            "time": "2018-03-19T15:21:29+00:00"
         },
         {
             "name": "web3p/secp256k1",
-            "version": "dev-master",
+            "version": "v0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/web3p/secp256k1.git",
-                "reference": "c31138e694eb84199b16d2f91494e07e34a752af"
+                "reference": "f63f4e88de662311f114b510a1c17a460e20dbf2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/web3p/secp256k1/zipball/c31138e694eb84199b16d2f91494e07e34a752af",
-                "reference": "c31138e694eb84199b16d2f91494e07e34a752af",
+                "url": "https://api.github.com/repos/web3p/secp256k1/zipball/f63f4e88de662311f114b510a1c17a460e20dbf2",
+                "reference": "f63f4e88de662311f114b510a1c17a460e20dbf2",
                 "shasum": ""
             },
             "require": {
@@ -250,7 +250,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Secp256k1\\": "src/"
+                    "Web3p\\Secp256k1\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -264,7 +264,7 @@
                 }
             ],
             "description": "Ethereum secp256k1 library in PHP.",
-            "time": "2018-02-25 13:59:35"
+            "time": "2018-03-20T02:37:13+00:00"
         }
     ],
     "packages-dev": [
@@ -321,7 +321,7 @@
                 "constructor",
                 "instantiate"
             ],
-            "time": "2018-03-05T09:41:42+00:00"
+            "time": "2018-03-05 09:41:42"
         },
         {
             "name": "myclabs/deep-copy",
@@ -371,7 +371,7 @@
                 "object",
                 "object graph"
             ],
-            "time": "2017-12-18T00:20:24+00:00"
+            "time": "2017-12-18 00:20:24"
         },
         {
             "name": "phar-io/manifest",
@@ -426,7 +426,7 @@
                 }
             ],
             "description": "Component for reading phar.io manifest information from a PHP Archive (PHAR)",
-            "time": "2017-04-07T07:07:10+00:00"
+            "time": "2017-04-07 07:07:10"
         },
         {
             "name": "phar-io/version",
@@ -527,7 +527,7 @@
                 "reflection",
                 "static analysis"
             ],
-            "time": "2018-02-14T18:58:54+00:00"
+            "time": "2018-02-14 18:58:54"
         },
         {
             "name": "phpdocumentor/reflection-docblock",
@@ -574,7 +574,7 @@
                 }
             ],
             "description": "With this component, a library can provide support for annotations via DocBlocks or otherwise retrieve information that is embedded in a DocBlock.",
-            "time": "2018-02-14T19:00:58+00:00"
+            "time": "2018-02-14 19:00:58"
         },
         {
             "name": "phpdocumentor/type-resolver",
@@ -619,7 +619,7 @@
                     "email": "me@mikevanriel.com"
                 }
             ],
-            "time": "2018-02-14T18:59:20+00:00"
+            "time": "2018-02-14 18:59:20"
         },
         {
             "name": "phpspec/prophecy",
@@ -682,7 +682,7 @@
                 "spy",
                 "stub"
             ],
-            "time": "2018-02-19T10:16:54+00:00"
+            "time": "2018-02-19 10:16:54"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -745,7 +745,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2017-12-07T10:13:30+00:00"
+            "time": "2017-12-07 10:13:30"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -792,7 +792,7 @@
                 "filesystem",
                 "iterator"
             ],
-            "time": "2017-11-27T13:52:08+00:00"
+            "time": "2017-11-27 13:52:08"
         },
         {
             "name": "phpunit/php-text-template",
@@ -882,7 +882,7 @@
             "keywords": [
                 "timer"
             ],
-            "time": "2018-01-06T05:27:16+00:00"
+            "time": "2018-01-06 05:27:16"
         },
         {
             "name": "phpunit/php-token-stream",
@@ -931,7 +931,7 @@
             "keywords": [
                 "tokenizer"
             ],
-            "time": "2017-11-27T08:47:38+00:00"
+            "time": "2017-11-27 08:47:38"
         },
         {
             "name": "phpunit/phpunit",
@@ -939,12 +939,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "6bd77b57707c236833d2b57b968e403df060c9d9"
+                "reference": "ea739aae4742aa4eae1e98d4d06acdbf01692415"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/6bd77b57707c236833d2b57b968e403df060c9d9",
-                "reference": "6bd77b57707c236833d2b57b968e403df060c9d9",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/ea739aae4742aa4eae1e98d4d06acdbf01692415",
+                "reference": "ea739aae4742aa4eae1e98d4d06acdbf01692415",
                 "shasum": ""
             },
             "require": {
@@ -1015,7 +1015,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2018-02-26T07:01:09+00:00"
+            "time": "2018-03-15T16:51:04+00:00"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
@@ -1074,7 +1074,7 @@
                 "mock",
                 "xunit"
             ],
-            "time": "2018-01-07T17:10:51+00:00"
+            "time": "2018-01-07 17:10:51"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
@@ -1119,7 +1119,7 @@
             ],
             "description": "Looks up which function or method a line of code belongs to",
             "homepage": "https://github.com/sebastianbergmann/code-unit-reverse-lookup/",
-            "time": "2017-03-04T10:23:55+00:00"
+            "time": "2017-03-04 10:23:55"
         },
         {
             "name": "sebastian/comparator",
@@ -1183,7 +1183,7 @@
                 "compare",
                 "equality"
             ],
-            "time": "2018-02-01T13:46:46+00:00"
+            "time": "2018-02-01 13:46:46"
         },
         {
             "name": "sebastian/diff",
@@ -1235,7 +1235,7 @@
             "keywords": [
                 "diff"
             ],
-            "time": "2017-12-14T11:32:19+00:00"
+            "time": "2017-12-14 11:32:19"
         },
         {
             "name": "sebastian/environment",
@@ -1352,7 +1352,7 @@
                 "export",
                 "exporter"
             ],
-            "time": "2017-11-16T09:48:09+00:00"
+            "time": "2017-11-16 09:48:09"
         },
         {
             "name": "sebastian/global-state",
@@ -1403,7 +1403,7 @@
             "keywords": [
                 "global state"
             ],
-            "time": "2017-11-16T09:49:42+00:00"
+            "time": "2017-11-16 09:49:42"
         },
         {
             "name": "sebastian/object-enumerator",
@@ -1450,7 +1450,7 @@
             ],
             "description": "Traverses array structures and object graphs to enumerate all referenced objects",
             "homepage": "https://github.com/sebastianbergmann/object-enumerator/",
-            "time": "2017-11-16T09:50:04+00:00"
+            "time": "2017-11-16 09:50:04"
         },
         {
             "name": "sebastian/object-reflector",
@@ -1495,7 +1495,7 @@
             ],
             "description": "Allows reflection of object attributes, including inherited and non-public ones",
             "homepage": "https://github.com/sebastianbergmann/object-reflector/",
-            "time": "2018-01-07T16:00:13+00:00"
+            "time": "2018-01-07 16:00:13"
         },
         {
             "name": "sebastian/recursion-context",
@@ -1548,7 +1548,7 @@
             ],
             "description": "Provides functionality to recursively process PHP variables",
             "homepage": "http://www.github.com/sebastianbergmann/recursion-context",
-            "time": "2017-11-16T10:04:08+00:00"
+            "time": "2017-11-16 10:04:08"
         },
         {
             "name": "sebastian/resource-operations",
@@ -1590,7 +1590,7 @@
             ],
             "description": "Provides a list of PHP built-in functions that operate on resources",
             "homepage": "https://www.github.com/sebastianbergmann/resource-operations",
-            "time": "2016-10-03T07:43:09+00:00"
+            "time": "2016-10-03 07:43:09"
         },
         {
             "name": "sebastian/version",
@@ -1723,16 +1723,12 @@
                 "check",
                 "validate"
             ],
-            "time": "2018-01-29T19:49:41+00:00"
+            "time": "2018-01-29 19:49:41"
         }
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "web3p/rlp": 20,
-        "web3p/secp256k1": 20,
-        "kornrunner/keccak": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

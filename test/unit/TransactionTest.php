@@ -3,7 +3,7 @@
 namespace Test\Unit;
 
 use Test\TestCase;
-use EthereumTx\Transaction;
+use Web3p\EthereumTx\Transaction;
 
 class TransactionTest extends TestCase
 {

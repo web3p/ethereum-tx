@@ -15,7 +15,7 @@ use InvalidArgumentException;
 use RuntimeException;
 use kornrunner\Keccak;
 use Web3p\RLP\RLP;
-use Web3p\Secp256k1\Secp256k1;
+use Elliptic\EC;
 use ArrayAccess;
 
 class Transaction implements ArrayAccess
@@ -64,7 +64,7 @@ class Transaction implements ArrayAccess
     /**
      * secp256k1
      * 
-     * @var \Web3p\Secp256k1\Secp256k1
+     * @var \Elliptic\EC
      */
     protected $secp256k1;
 
@@ -84,7 +84,7 @@ class Transaction implements ArrayAccess
             }
         }
         $this->rlp = new RLP;
-        $this->secp256k1 = new Secp256k1;
+        $this->secp256k1 = new EC('secp256k1');
     }
 
     /**
@@ -230,14 +230,17 @@ class Transaction implements ArrayAccess
      */
     public function serialize()
     {
-        $v = 37;
         $chainId = $this->offsetGet('chainId');
 
-        if ($chainId) {
-            $v = (int) $chainId * 2 + 35;
+        if ($chainId && $chainId > 0) {
+            $v = (int) $chainId;
+            $this->offsetSet('v', $v);
+            $this->offsetSet('r', 0);
+            $this->offsetSet('s', 0);
+            $txData = array_fill(0, 9, '');
+        } else {
+            $txData = array_fill(0, 6, '');
         }
-        $this->offsetSet('v', $v);
-        $txData = array_fill(0, 9, '');
 
         foreach ($this->txData as $key => $data) {
             if ($key >= 0) {
@@ -256,14 +259,21 @@ class Transaction implements ArrayAccess
     public function sign(string $privateKey)
     {
         $txHash = $this->hash();
-        $rlp = new RLP;
-        $secp256k1 = new Secp256k1;
-        $signature = $secp256k1->sign($txHash, $privateKey);
-        $r = $signature->getR();
-        $s = $signature->getS();
+        $key = $this->secp256k1->keyFromPrivate($privateKey);
+        $signature = $key->sign($txHash);
+        $r = $signature->r;
+        $s = $signature->s;
+        $v = $signature->recoveryParam + 35;
 
-        $this->offsetSet('r', '0x' . gmp_strval($r, 16));
-        $this->offsetSet('s', '0x' . gmp_strval($s, 16));
+        $chainId = $this->offsetGet('chainId');
+
+        if ($chainId && $chainId > 0) {
+            $v += (int) $chainId * 2;
+        }
+
+        $this->offsetSet('r', '0x' . $r->toString(16));
+        $this->offsetSet('s', '0x' . $s->toString(16));
+        $this->offsetSet('v', $v);
 
         return $this->serialize()->toString('hex');
     }

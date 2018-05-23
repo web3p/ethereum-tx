@@ -15,7 +15,8 @@ use InvalidArgumentException;
 use RuntimeException;
 use kornrunner\Keccak;
 use Web3p\RLP\RLP;
-use Web3p\Secp256k1\Secp256k1;
+use Elliptic\EC;
+use Elliptic\EC\KeyPair;
 use ArrayAccess;
 
 class Transaction implements ArrayAccess
@@ -64,9 +65,16 @@ class Transaction implements ArrayAccess
     /**
      * secp256k1
      * 
-     * @var \Web3p\Secp256k1\Secp256k1
+     * @var \Elliptic\EC
      */
     protected $secp256k1;
+
+    /**
+     * privateKey
+     * 
+     * @var \Elliptic\EC\KeyPair
+     */
+    protected $privateKey;
 
     /**
      * construct
@@ -84,7 +92,7 @@ class Transaction implements ArrayAccess
             }
         }
         $this->rlp = new RLP;
-        $this->secp256k1 = new Secp256k1;
+        $this->secp256k1 = new EC('secp256k1');
     }
 
     /**
@@ -210,11 +218,8 @@ class Transaction implements ArrayAccess
      * @param string $value
      * @return string
      */
-    public function sha3($value)
+    public function sha3(string $value)
     {
-        if (!is_string($value)) {
-            throw new InvalidArgumentException('The value to sha3 function must be string.');
-        }
         $hash = Keccak::hash($value, 256);
 
         if ($hash === $this::SHA3_NULL_HASH) {
@@ -226,19 +231,21 @@ class Transaction implements ArrayAccess
     /**
      * serialize
      * 
-     * @return string
+     * @return \Web3p\RLP\RLP\Buffer
      */
     public function serialize()
     {
-        $v = 37;
         $chainId = $this->offsetGet('chainId');
 
-        if ($chainId) {
-            $v = (int) $chainId * 2 + 35;
+        // sort tx data
+        if (ksort($this->txData) !== true) {
+            throw new RuntimeException('Cannot sort tx data by keys.');
         }
-        $this->offsetSet('v', $v);
-        $txData = array_fill(0, 9, '');
-
+        if ($chainId && $chainId > 0) {
+            $txData = array_fill(0, 9, '');
+        } else {
+            $txData = array_fill(0, 6, '');
+        }
         foreach ($this->txData as $key => $data) {
             if ($key >= 0) {
                 $txData[$key] = $data;
@@ -255,15 +262,23 @@ class Transaction implements ArrayAccess
      */
     public function sign(string $privateKey)
     {
-        $txHash = $this->hash();
-        $rlp = new RLP;
-        $secp256k1 = new Secp256k1;
-        $signature = $secp256k1->sign($txHash, $privateKey);
-        $r = $signature->getR();
-        $s = $signature->getS();
+        $txHash = $this->hash(false);
+        $privateKey = $this->secp256k1->keyFromPrivate($privateKey, 'hex');
+        $signature = $privateKey->sign($txHash);
+        $r = $signature->r;
+        $s = $signature->s;
+        $v = $signature->recoveryParam + 35;
 
-        $this->offsetSet('r', '0x' . gmp_strval($r, 16));
-        $this->offsetSet('s', '0x' . gmp_strval($s, 16));
+        $chainId = $this->offsetGet('chainId');
+
+        if ($chainId && $chainId > 0) {
+            $v += (int) $chainId * 2;
+        }
+
+        $this->offsetSet('r', '0x' . $r->toString(16));
+        $this->offsetSet('s', '0x' . $s->toString(16));
+        $this->offsetSet('v', $v);
+        $this->privateKey = $privateKey;
 
         return $this->serialize()->toString('hex');
     }
@@ -271,11 +286,80 @@ class Transaction implements ArrayAccess
     /**
      * hash
      *
+     * @param bool $includeSignature
      * @return string
      */
-    public function hash()
+    public function hash($includeSignature=false)
     {
-        $serializedTx = $this->serialize()->toString('utf8');
+        $chainId = $this->offsetGet('chainId');
+
+        // sort tx data
+        if (ksort($this->txData) !== true) {
+            throw new RuntimeException('Cannot sort tx data by keys.');
+        }
+        if ($includeSignature) {
+            $txData = $this->txData;
+        } else {
+            if ($chainId && $chainId > 0) {
+                $v = (int) $chainId;
+                $this->offsetSet('r', '');
+                $this->offsetSet('s', '');
+                $this->offsetSet('v', $v);
+                $txData = array_fill(0, 9, '');
+            } else {
+                $txData = array_fill(0, 6, '');
+            }
+
+            foreach ($this->txData as $key => $data) {
+                if ($key >= 0) {
+                    $txData[$key] = $data;
+                }
+            }
+        }
+        $serializedTx = $this->rlp->encode($txData)->toString('utf8');
+
         return $this->sha3($serializedTx);
+    }
+
+    /**
+     * getFromAddress
+     * 
+     * @return string
+     */
+    public function getFromAddress()
+    {
+        $from = $this->offsetGet('from');
+
+        if ($from) {
+            return $from;
+        }
+        if (!isset($this->privateKey) || !($this->privateKey instanceof KeyPair)) {
+            // recover from hash
+            $r = $this->offsetGet('r');
+            $s = $this->offsetGet('s');
+            $v = $this->offsetGet('v');
+            $chainId = $this->offsetGet('chainId');
+
+            if (!$r || !$s) {
+                throw new RuntimeException('Invalid signature r and s.');
+            }
+            $txHash = $this->hash(false);
+
+            if ($chainId && $chainId > 0) {
+                $v -= ($chainId * 2);
+            }
+            $v -= 35;
+            $publicKey = $this->secp256k1->recoverPubKey($txHash, [
+                'r' => $r,
+                's' => $s
+            ], $v);
+            $publicKey = $publicKey->encode('hex');
+        } else {
+            $publicKey = $this->privateKey->getPublic(false, 'hex');
+        }
+        $from = '0x' . substr($this->sha3(substr(hex2bin($publicKey), 1)), 24);
+
+        $this->offsetSet('from', $from);
+        return $from;
     }
 }

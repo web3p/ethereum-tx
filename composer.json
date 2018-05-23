@@ -25,7 +25,7 @@
     },
     "require": {
         "web3p/rlp": "~0.2",
-        "web3p/secp256k1": "~0.2",
-        "kornrunner/keccak": "~1"
+        "kornrunner/keccak": "~1",
+        "simplito/elliptic-php": "1.0.3"
     }
 }

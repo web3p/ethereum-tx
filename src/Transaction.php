@@ -16,6 +16,7 @@ use RuntimeException;
 use kornrunner\Keccak;
 use Web3p\RLP\RLP;
 use Elliptic\EC;
+use Elliptic\EC\KeyPair;
 use ArrayAccess;
 
 class Transaction implements ArrayAccess
@@ -67,6 +68,13 @@ class Transaction implements ArrayAccess
      * @var \Elliptic\EC
      */
     protected $secp256k1;
+
+    /**
+     * privateKey
+     * 
+     * @var \Elliptic\EC\KeyPair
+     */
+    protected $privateKey;
 
     /**
      * construct
@@ -253,8 +261,8 @@ class Transaction implements ArrayAccess
     public function sign(string $privateKey)
     {
         $txHash = $this->hash(false);
-        $key = $this->secp256k1->keyFromPrivate($privateKey, 'hex');
-        $signature = $key->sign($txHash);
+        $privateKey = $this->secp256k1->keyFromPrivate($privateKey, 'hex');
+        $signature = $privateKey->sign($txHash);
         $r = $signature->r;
         $s = $signature->s;
         $v = $signature->recoveryParam + 35;
@@ -268,6 +276,7 @@ class Transaction implements ArrayAccess
         $this->offsetSet('r', '0x' . $r->toString(16));
         $this->offsetSet('s', '0x' . $s->toString(16));
         $this->offsetSet('v', $v);
+        $this->privateKey = $privateKey;
 
         return $this->serialize()->toString('hex');
     }
@@ -308,5 +317,48 @@ class Transaction implements ArrayAccess
         $serializedTx = $this->rlp->encode($txData)->toString('utf8');
 
         return $this->sha3($serializedTx);
+    }
+
+    /**
+     * getFromAddress
+     * 
+     * @return string
+     */
+    public function getFromAddress()
+    {
+        $from = $this->offsetGet('from');
+
+        if ($from) {
+            var_dump(1);
+            return $from;
+        }
+        if (!isset($this->privateKey) || !($this->privateKey instanceof KeyPair)) {
+            // recover from hash
+            $r = $this->offsetGet('r');
+            $s = $this->offsetGet('s');
+            $v = $this->offsetGet('v');
+            $chainId = $this->offsetGet('chainId');
+
+            if (!$r || !$s) {
+                throw new RuntimeException('Invalid signature r and s.');
+            }
+            $txHash = $this->hash(false);
+
+            if ($chainId && $chainId > 0) {
+                $v -= ($chainId * 2);
+            }
+            $v -= 35;
+            $publicKey = $this->secp256k1->recoverPubKey($txHash, [
+                'r' => $r,
+                's' => $s
+            ], $v);
+            $publicKey = $publicKey->encode('hex');
+        } else {
+            $publicKey = $this->privateKey->getPublic(false, 'hex');
+        }
+        $from = '0x' . substr($this->sha3(substr(hex2bin($publicKey), 1)), 24);
+
+        $this->offsetSet('from', $from);
+        return $from;
     }
 }

@@ -218,4 +218,65 @@ class TransactionTest extends TestCase
         $this->assertEquals('daf5a779ae972f972197303d7b574746c7ef83eadac0f2791ad23db92e4c8e53', $transaction->hash(false));
         $this->assertEquals('f86c098504a817c800825208943535353535353535353535353535353535353535880de0b6b3a76400008025a028ef61340bd939bc2195fe537567866003e1a15d3c71ff63e1590620aa636276a067cbe9d8997f761aecb703304b3800ccf555c9f3dc64214b297fb1966a3b6d83', $transaction->sign('0x4646464646464646464646464646464646464646464646464646464646464646'));
     }
+
+    /**
+     * testGetFromAddress
+     * 0x9d8a62f656a8d1615c1294fd71e9cfb3e4855a4f
+     * 
+     * @return void
+     */
+    public function testGetFromAddress()
+    {
+        $transaction = new Transaction([
+            'nonce' => '0x09',
+            'to' => '0x3535353535353535353535353535353535353535',
+            'gas' => '0x5208',
+            'gasPrice' => '0x4a817c800',
+            'value' => '0xde0b6b3a7640000',
+            'chainId' => 1,
+            'data' => ''
+        ]);
+        // sign tx
+        $transaction->sign('0x4646464646464646464646464646464646464646464646464646464646464646');
+        $r = $transaction['r'];
+        $s = $transaction['s'];
+        $v = $transaction['v'];
+
+        // get from privatekey
+        $fromA = $transaction->getFromAddress();
+
+        $transaction = new Transaction([
+            'nonce' => '0x09',
+            'to' => '0x3535353535353535353535353535353535353535',
+            'gas' => '0x5208',
+            'gasPrice' => '0x4a817c800',
+            'value' => '0xde0b6b3a7640000',
+            'chainId' => 1,
+            'data' => ''
+        ]);
+        $transaction['r'] = $r;
+        $transaction['s'] = $s;
+        $transaction['v'] = $v;
+
+        // get from r, s, v
+        $fromB = $transaction->getFromAddress();
+
+        $transaction = new Transaction([
+            'from' => '0x9d8a62f656a8d1615c1294fd71e9cfb3e4855a4f',
+            'nonce' => '0x09',
+            'to' => '0x3535353535353535353535353535353535353535',
+            'gas' => '0x5208',
+            'gasPrice' => '0x4a817c800',
+            'value' => '0xde0b6b3a7640000',
+            'chainId' => 1,
+            'data' => ''
+        ]);
+
+        // get from transaction
+        $fromC = $transaction->getFromAddress();
+
+        $this->assertEquals('0x9d8a62f656a8d1615c1294fd71e9cfb3e4855a4f', $fromA);
+        $this->assertEquals($fromA, $fromB);
+        $this->assertEquals($fromB, $fromC);
+    }
 }

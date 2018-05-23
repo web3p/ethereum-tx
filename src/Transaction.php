@@ -235,6 +235,8 @@ class Transaction implements ArrayAccess
      */
     public function serialize()
     {
+        $chainId = $this->offsetGet('chainId');
+
         // sort tx data
         if (ksort($this->txData) !== true) {
             throw new RuntimeException('Cannot sort tx data by keys.');
@@ -329,7 +331,6 @@ class Transaction implements ArrayAccess
         $from = $this->offsetGet('from');
 
         if ($from) {
-            var_dump(1);
             return $from;
         }
         if (!isset($this->privateKey) || !($this->privateKey instanceof KeyPair)) {

@@ -210,11 +210,8 @@ class Transaction implements ArrayAccess
      * @param string $value
      * @return string
      */
-    public function sha3($value)
+    public function sha3(string $value)
     {
-        if (!is_string($value)) {
-            throw new InvalidArgumentException('The value to sha3 function must be string.');
-        }
         $hash = Keccak::hash($value, 256);
 
         if ($hash === $this::SHA3_NULL_HASH) {
@@ -226,22 +223,19 @@ class Transaction implements ArrayAccess
     /**
      * serialize
      * 
-     * @return string
+     * @return \Web3p\RLP\RLP\Buffer
      */
     public function serialize()
     {
-        $chainId = $this->offsetGet('chainId');
-
+        // sort tx data
+        if (ksort($this->txData) !== true) {
+            throw new RuntimeException('Cannot sort tx data by keys.');
+        }
         if ($chainId && $chainId > 0) {
-            $v = (int) $chainId;
-            $this->offsetSet('v', $v);
-            $this->offsetSet('r', 0);
-            $this->offsetSet('s', 0);
             $txData = array_fill(0, 9, '');
         } else {
             $txData = array_fill(0, 6, '');
         }
-
         foreach ($this->txData as $key => $data) {
             if ($key >= 0) {
                 $txData[$key] = $data;
@@ -258,8 +252,8 @@ class Transaction implements ArrayAccess
      */
     public function sign(string $privateKey)
     {
-        $txHash = $this->hash();
-        $key = $this->secp256k1->keyFromPrivate($privateKey);
+        $txHash = $this->hash(false);
+        $key = $this->secp256k1->keyFromPrivate($privateKey, 'hex');
         $signature = $key->sign($txHash);
         $r = $signature->r;
         $s = $signature->s;
@@ -281,11 +275,38 @@ class Transaction implements ArrayAccess
     /**
      * hash
      *
+     * @param bool $includeSignature
      * @return string
      */
-    public function hash()
+    public function hash($includeSignature=false)
     {
-        $serializedTx = $this->serialize()->toString('utf8');
+        $chainId = $this->offsetGet('chainId');
+
+        // sort tx data
+        if (ksort($this->txData) !== true) {
+            throw new RuntimeException('Cannot sort tx data by keys.');
+        }
+        if ($includeSignature) {
+            $txData = $this->txData;
+        } else {
+            if ($chainId && $chainId > 0) {
+                $v = (int) $chainId;
+                $this->offsetSet('r', '');
+                $this->offsetSet('s', '');
+                $this->offsetSet('v', $v);
+                $txData = array_fill(0, 9, '');
+            } else {
+                $txData = array_fill(0, 6, '');
+            }
+
+            foreach ($this->txData as $key => $data) {
+                if ($key >= 0) {
+                    $txData[$key] = $data;
+                }
+            }
+        }
+        $serializedTx = $this->rlp->encode($txData)->toString('utf8');
+
         return $this->sha3($serializedTx);
     }
 }

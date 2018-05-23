@@ -100,39 +100,6 @@ class TransactionTest extends TestCase
     }
 
     /**
-     * testSerialize
-     * 
-     * @return void
-     */
-    public function testSerialize()
-    {
-        $transaction = new Transaction([
-            'nonce' => '0x01',
-            'from' => '0xb60e8dd61c5d32be8058bb8eb970870f07233155',
-            'to' => '0xd46e8dd67c5d32be8058bb8eb970870f07244567',
-            'gas' => '0x76c0',
-            'gasPrice' => '0x9184e72a000',
-            'value' => '0x9184e72a',
-            'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
-        ]);
-
-        $this->assertEquals('f852018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675258080', $transaction->serialize()->toString('hex'));
-
-        $transaction = new Transaction([
-            'nonce' => '0x01',
-            'from' => '0xb60e8dd61c5d32be8058bb8eb970870f07233155',
-            'to' => '0xd46e8dd67c5d32be8058bb8eb970870f07244567',
-            'gas' => '0x76c0',
-            'gasPrice' => '0x9184e72a000',
-            'value' => '0x9184e72a',
-            'chainId' => 4,
-            'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
-        ]);
-
-        $this->assertEquals('f852018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f0724456752b8080', $transaction->serialize()->toString('hex'));
-    }
-
-    /**
      * testSha3
      * 
      * @return void
@@ -171,7 +138,7 @@ class TransactionTest extends TestCase
             'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
         ]);
 
-        $this->assertEquals('710aee292b0f1749aaa0cfef67111e2f716afbdb475e7f250bdb80c6655b0a66', $transaction->hash());
+        $this->assertEquals('79617051b33e38636c12fb761abf62c20a9dd5a743ca5f338f04f2cf5f2ec6bd', $transaction->hash());
 
         $transaction = new Transaction([
             'nonce' => '0x01',
@@ -184,7 +151,7 @@ class TransactionTest extends TestCase
             'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
         ]);
 
-        $this->assertEquals('dd4238507087c6d354079ea5a4c8da7abde43252f0accf79601d0fa1a10300d8', (string) $transaction);
+        $this->assertEquals('8aace0c8df439c9cc9f313b116f1db03e0811ca07e582d351aad1c9d6542c23d', (string) $transaction);
     }
 
     /**
@@ -203,6 +170,52 @@ class TransactionTest extends TestCase
             'value' => '0x9184e72a',
             'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
         ]);
-        $this->assertEquals('f892018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567525a08d8bfd01c48454b5b3fed2361cbd0e8c3282d5bd2e26762e4c9dfbe1ef35f325a06d6a5dc397934b5544835f34ff24263cbc00bdd516b6f0df3f29cdf6c779ccfb', $transaction->sign($this->testPrivateKey));
+        $this->assertEquals('f892018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567523a0a48d3ce9c68bb49825aea5335bd07432823e858e8a504767d08290c28aafddf8a0416c7abc3a67080db0ad07c42de82db4e05518f99595119677398c68d431ab37', $transaction->sign($this->testPrivateKey));
+    }
+
+    /**
+     * testSerialize
+     * 
+     * @return void
+     */
+    public function testSerialize()
+    {
+        $transaction = new Transaction([
+            'nonce' => '0x01',
+            'from' => '0xb60e8dd61c5d32be8058bb8eb970870f07233155',
+            'to' => '0xd46e8dd67c5d32be8058bb8eb970870f07244567',
+            'gas' => '0x76c0',
+            'gasPrice' => '0x9184e72a000',
+            'value' => '0x9184e72a',
+            'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
+        ]);
+
+        $this->assertEquals('f84f018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675', $transaction->serialize()->toString('hex'));
+
+        // sign tx
+        $transaction->sign($this->testPrivateKey);
+
+        $this->assertEquals('f892018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567523a0a48d3ce9c68bb49825aea5335bd07432823e858e8a504767d08290c28aafddf8a0416c7abc3a67080db0ad07c42de82db4e05518f99595119677398c68d431ab37', $transaction->serialize()->toString('hex'));
+    }
+
+    /**
+     * testEIP155
+     * you can find test case here: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
+     * 
+     * @return void
+     */
+    public function testEIP155()
+    {
+        $transaction = new Transaction([
+            'nonce' => '0x09',
+            'to' => '0x3535353535353535353535353535353535353535',
+            'gas' => '0x5208',
+            'gasPrice' => '0x4a817c800',
+            'value' => '0xde0b6b3a7640000',
+            'chainId' => 1,
+            'data' => ''
+        ]);
+        $this->assertEquals('daf5a779ae972f972197303d7b574746c7ef83eadac0f2791ad23db92e4c8e53', $transaction->hash(false));
+        $this->assertEquals('f86c098504a817c800825208943535353535353535353535353535353535353535880de0b6b3a76400008025a028ef61340bd939bc2195fe537567866003e1a15d3c71ff63e1590620aa636276a067cbe9d8997f761aecb703304b3800ccf555c9f3dc64214b297fb1966a3b6d83', $transaction->sign('0x4646464646464646464646464646464646464646464646464646464646464646'));
     }
 }

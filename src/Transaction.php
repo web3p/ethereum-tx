@@ -79,20 +79,41 @@ class Transaction implements ArrayAccess
     /**
      * construct
      * 
-     * @param array $txData
+     * @param array|string $txData
      * @return void
      */
-    public function __construct(array $txData=[])
+    public function __construct($txData=[])
     {
-        foreach ($txData as $key => $data) {
-            $txKey = isset($this->map[$key]) ? $this->map[$key] : null;
-
-            if (is_int($txKey)) {
-                $this->txData[$txKey] = $data;
-            }
-        }
         $this->rlp = new RLP;
         $this->secp256k1 = new EC('secp256k1');
+        $tx = [];
+
+        if (is_array($txData)) {
+            foreach ($txData as $key => $data) {
+                $txKey = isset($this->map[$key]) ? $this->map[$key] : null;
+    
+                if (is_int($txKey)) {
+                    $tx[$txKey] = $data;
+                }
+            }
+        } elseif (is_string($txData)) {
+            if (strpos($txData, '0x') === 0) {
+                $txData = $this->rlp->decode($txData);
+
+                foreach ($txData as $txKey => $data) {
+                    if (is_int($txKey)) {
+                        $hexData = $data->toString('hex');
+
+                        if (strlen($hexData) > 0) {
+                            $tx[$txKey] = '0x' . $hexData;
+                        } else {
+                            $tx[$txKey] = $hexData;
+                        }
+                    }
+                }
+            }
+        }
+        $this->txData = $tx;
     }
 
     /**

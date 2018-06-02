@@ -285,7 +285,9 @@ class Transaction implements ArrayAccess
     {
         $txHash = $this->hash(false);
         $privateKey = $this->secp256k1->keyFromPrivate($privateKey, 'hex');
-        $signature = $privateKey->sign($txHash);
+        $signature = $privateKey->sign($txHash, [
+            'canonical' => true
+        ]);
         $r = $signature->r;
         $s = $signature->s;
         $v = $signature->recoveryParam + 35;
@@ -321,6 +323,8 @@ class Transaction implements ArrayAccess
         if ($includeSignature) {
             $txData = $this->txData;
         } else {
+            $rawTxData = $this->txData;
+
             if ($chainId && $chainId > 0) {
                 $v = (int) $chainId;
                 $this->offsetSet('r', '');
@@ -336,6 +340,7 @@ class Transaction implements ArrayAccess
                     $txData[$key] = $data;
                 }
             }
+            $this->txData = $rawTxData;
         }
         $serializedTx = $this->rlp->encode($txData)->toString('utf8');
 

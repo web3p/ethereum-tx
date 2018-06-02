@@ -206,6 +206,21 @@ class TransactionTest extends TestCase
      */
     public function testEIP155()
     {
+        // test signing data
+        $transaction = new Transaction([
+            'nonce' => '0x09',
+            'to' => '0x3535353535353535353535353535353535353535',
+            'gas' => '0x5208',
+            'gasPrice' => '0x4a817c800',
+            'value' => '0xde0b6b3a7640000',
+            'chainId' => 1,
+            'data' => ''
+        ]);
+        $transaction['r'] = '';
+        $transaction['s'] = '';
+        $transaction['v'] = 1;
+        $this->assertEquals('ec098504a817c800825208943535353535353535353535353535353535353535880de0b6b3a764000080018080', $transaction->serialize()->toString('hex'));
+
         $transaction = new Transaction([
             'nonce' => '0x09',
             'to' => '0x3535353535353535353535353535353535353535',

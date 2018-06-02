@@ -285,7 +285,9 @@ class Transaction implements ArrayAccess
     {
         $txHash = $this->hash(false);
         $privateKey = $this->secp256k1->keyFromPrivate($privateKey, 'hex');
-        $signature = $privateKey->sign($txHash);
+        $signature = $privateKey->sign($txHash, [
+            'canonical' => true
+        ]);
         $r = $signature->r;
         $s = $signature->s;
         $v = $signature->recoveryParam + 35;

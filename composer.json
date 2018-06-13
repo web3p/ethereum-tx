@@ -24,6 +24,7 @@
     },
     "require": {
         "web3p/rlp": "~0.2.1",
+        "web3p/ethereum-util": "~0.1",
         "kornrunner/keccak": "~1",
         "simplito/elliptic-php": "1.0.3"
     }

@@ -29,23 +29,47 @@ class Transaction implements ArrayAccess
     const SHA3_NULL_HASH = 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
 
     /**
-     * txData
+     * attributeMap
      * 
      * @var array
      */
-    protected $map = [
-        'from' => -1,
-        'chainId' => -2,
-        'nonce' => 0,
-        'gasPrice' => 1,
-        'gasLimit' => 2,
-        'gas' => 2,
-        'to' => 3,
-        'value' => 4,
-        'data' => 5,
-        'v' => 6,
-        'r' => 7,
-        's' => 8
+    protected $attributeMap = [
+        'from' => [
+            'key' => -1
+        ],
+        'chainId' => [
+            'key' => -2
+        ],
+        'nonce' => [
+            'key' => 0
+        ],
+        'gasPrice' => [
+            'key' => 1
+        ],
+        'gasLimit' => [
+            'key' => 2
+        ],
+        'gas' => [
+            'key' => 2
+        ],
+        'to' => [
+            'key' => 3
+        ],
+        'value' => [
+            'key' => 4
+        ],
+        'data' => [
+            'key' => 5
+        ],
+        'v' => [
+            'key' => 6
+        ],
+        'r' => [
+            'key' => 7
+        ],
+        's' => [
+            'key' => 8
+        ]
     ];
 
     /**
@@ -90,10 +114,10 @@ class Transaction implements ArrayAccess
 
         if (is_array($txData)) {
             foreach ($txData as $key => $data) {
-                $txKey = isset($this->map[$key]) ? $this->map[$key] : null;
+                $txKey = isset($this->attributeMap[$key]) ? $this->attributeMap[$key] : null;
     
-                if (is_int($txKey)) {
-                    $tx[$txKey] = $data;
+                if (is_array($txKey)) {
+                    $tx[$txKey['key']] = $data;
                 }
             }
         } elseif (is_string($txData)) {
@@ -168,10 +192,10 @@ class Transaction implements ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        $txKey = isset($this->map[$offset]) ? $this->map[$offset] : null;
+        $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
-        if (is_int($txKey)) {
-            $this->txData[$txKey] = $value;
+        if (is_array($txKey)) {
+            $this->txData[$txKey['key']] = $value;
         }
     }
 
@@ -183,10 +207,10 @@ class Transaction implements ArrayAccess
      */
     public function offsetExists($offset)
     {
-        $txKey = isset($this->map[$offset]) ? $this->map[$offset] : null;
+        $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
-        if (is_int($txKey)) {
-            return isset($this->txData[$txKey]);
+        if (is_array($txKey)) {
+            return isset($this->txData[$txKey['key']]);
         }
         return false;
     }
@@ -199,10 +223,10 @@ class Transaction implements ArrayAccess
      */
     public function offsetUnset($offset)
     {
-        $txKey = isset($this->map[$offset]) ? $this->map[$offset] : null;
+        $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
-        if (is_int($txKey) && isset($this->txData[$txKey])) {
-            unset($this->txData[$txKey]);
+        if (is_array($txKey) && isset($this->txData[$txKey['key']])) {
+            unset($this->txData[$txKey['key']]);
         }
     }
 
@@ -214,10 +238,10 @@ class Transaction implements ArrayAccess
      */
     public function offsetGet($offset)
     {
-        $txKey = isset($this->map[$offset]) ? $this->map[$offset] : null;
+        $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
-        if (is_int($txKey) && isset($this->txData[$txKey])) {
-            return $this->txData[$txKey];
+        if (is_array($txKey) && isset($this->txData[$txKey['key']])) {
+            return $this->txData[$txKey['key']];
         }
         return null;
     }

@@ -13,21 +13,14 @@ namespace Web3p\EthereumTx;
 
 use InvalidArgumentException;
 use RuntimeException;
-use kornrunner\Keccak;
 use Web3p\RLP\RLP;
 use Elliptic\EC;
 use Elliptic\EC\KeyPair;
 use ArrayAccess;
+use Web3p\EthereumUtil\Util;
 
 class Transaction implements ArrayAccess
 {
-    /**
-     * SHA3_NULL_HASH
-     * 
-     * @const string
-     */
-    const SHA3_NULL_HASH = 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
-
     /**
      * attributeMap
      * 
@@ -41,34 +34,53 @@ class Transaction implements ArrayAccess
             'key' => -2
         ],
         'nonce' => [
-            'key' => 0
+            'key' => 0,
+            'length' => 32,
+            'allowLess' => true
         ],
         'gasPrice' => [
-            'key' => 1
+            'key' => 1,
+            'length' => 32,
+            'allowLess' => true
         ],
         'gasLimit' => [
-            'key' => 2
+            'key' => 2,
+            'length' => 32,
+            'allowLess' => true
         ],
         'gas' => [
-            'key' => 2
+            'key' => 2,
+            'length' => 32,
+            'allowLess' => true
         ],
         'to' => [
-            'key' => 3
+            'key' => 3,
+            'length' => 20,
+            'allowZero' => true
         ],
         'value' => [
-            'key' => 4
+            'key' => 4,
+            'length' => 32,
+            'allowLess' => true
         ],
         'data' => [
-            'key' => 5
+            'key' => 5,
+            'allowLess' => true,
+            'allowZero' => true
         ],
         'v' => [
-            'key' => 6
+            'key' => 6,
+            'allowZero' => true
         ],
         'r' => [
-            'key' => 7
+            'key' => 7,
+            'length' => 32,
+            'allowZero' => true
         ],
         's' => [
-            'key' => 8
+            'key' => 8,
+            'length' => 32,
+            'allowZero' => true
         ]
     ];
 
@@ -101,6 +113,13 @@ class Transaction implements ArrayAccess
     protected $privateKey;
 
     /**
+     * util
+     * 
+     * @var \Web3p\EthereumUtil\Util
+     */
+    protected $util;
+
+    /**
      * construct
      * 
      * @param array|string $txData
@@ -110,6 +129,7 @@ class Transaction implements ArrayAccess
     {
         $this->rlp = new RLP;
         $this->secp256k1 = new EC('secp256k1');
+        $this->util = new Util;
         $tx = [];
 
         if (is_array($txData)) {
@@ -257,23 +277,6 @@ class Transaction implements ArrayAccess
     }
 
     /**
-     * sha3
-     * keccak256
-     * 
-     * @param string $value
-     * @return string
-     */
-    public function sha3(string $value)
-    {
-        $hash = Keccak::hash($value, 256);
-
-        if ($hash === $this::SHA3_NULL_HASH) {
-            return null;
-        }
-        return $hash;
-    }
-
-    /**
      * serialize
      * 
      * @return \Web3p\RLP\RLP\Buffer
@@ -368,7 +371,7 @@ class Transaction implements ArrayAccess
         }
         $serializedTx = $this->rlp->encode($txData)->toString('utf8');
 
-        return $this->sha3($serializedTx);
+        return $this->util->sha3($serializedTx);
     }
 
     /**
@@ -407,7 +410,7 @@ class Transaction implements ArrayAccess
         } else {
             $publicKey = $this->privateKey->getPublic(false, 'hex');
         }
-        $from = '0x' . substr($this->sha3(substr(hex2bin($publicKey), 1)), 24);
+        $from = '0x' . substr($this->util->sha3(substr(hex2bin($publicKey), 1)), 24);
 
         $this->offsetSet('from', $from);
         return $from;

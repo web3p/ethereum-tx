@@ -100,28 +100,6 @@ class TransactionTest extends TestCase
     }
 
     /**
-     * testSha3
-     * 
-     * @return void
-     */
-    public function testSha3()
-    {
-        $transaction = new Transaction([
-            'nonce' => '0x01',
-            'from' => '0xb60e8dd61c5d32be8058bb8eb970870f07233155',
-            'to' => '0xd46e8dd67c5d32be8058bb8eb970870f07244567',
-            'gas' => '0x76c0',
-            'gasPrice' => '0x9184e72a000',
-            'value' => '0x9184e72a',
-            'chainId' => 4,
-            'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
-        ]);
-
-        $this->assertNull($transaction->sha3(''));
-        $this->assertEquals('47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad', $transaction->sha3('hello world'));
-    }
-
-    /**
      * testHash
      * 
      * @return void

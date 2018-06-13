@@ -13,39 +13,80 @@ namespace Web3p\EthereumTx;
 
 use InvalidArgumentException;
 use RuntimeException;
-use kornrunner\Keccak;
 use Web3p\RLP\RLP;
 use Elliptic\EC;
 use Elliptic\EC\KeyPair;
 use ArrayAccess;
+use Web3p\EthereumUtil\Util;
 
 class Transaction implements ArrayAccess
 {
     /**
-     * SHA3_NULL_HASH
-     * 
-     * @const string
-     */
-    const SHA3_NULL_HASH = 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
-
-    /**
-     * txData
+     * attributeMap
      * 
      * @var array
      */
-    protected $map = [
-        'from' => -1,
-        'chainId' => -2,
-        'nonce' => 0,
-        'gasPrice' => 1,
-        'gasLimit' => 2,
-        'gas' => 2,
-        'to' => 3,
-        'value' => 4,
-        'data' => 5,
-        'v' => 6,
-        'r' => 7,
-        's' => 8
+    protected $attributeMap = [
+        'from' => [
+            'key' => -1
+        ],
+        'chainId' => [
+            'key' => -2
+        ],
+        'nonce' => [
+            'key' => 0,
+            'length' => 32,
+            'allowLess' => true,
+            'allowZero' => true
+        ],
+        'gasPrice' => [
+            'key' => 1,
+            'length' => 32,
+            'allowLess' => true,
+            'allowZero' => true
+        ],
+        'gasLimit' => [
+            'key' => 2,
+            'length' => 32,
+            'allowLess' => true,
+            'allowZero' => true
+        ],
+        'gas' => [
+            'key' => 2,
+            'length' => 32,
+            'allowLess' => true,
+            'allowZero' => true
+        ],
+        'to' => [
+            'key' => 3,
+            'length' => 20,
+            'allowZero' => true,
+        ],
+        'value' => [
+            'key' => 4,
+            'length' => 32,
+            'allowLess' => true,
+            'allowZero' => false
+        ],
+        'data' => [
+            'key' => 5,
+            'allowLess' => true,
+            'allowZero' => true
+        ],
+        'v' => [
+            'key' => 6,
+            'allowZero' => true
+        ],
+        'r' => [
+            'key' => 7,
+            'length' => 32,
+            'allowZero' => true
+        ],
+        's' => [
+            'key' => 8,
+            'length' => 32,
+            'allowZero' => true
+        ]
     ];
 
     /**
@@ -77,6 +118,13 @@ class Transaction implements ArrayAccess
     protected $privateKey;
 
     /**
+     * util
+     * 
+     * @var \Web3p\EthereumUtil\Util
+     */
+    protected $util;
+
+    /**
      * construct
      * 
      * @param array|string $txData
@@ -86,18 +134,16 @@ class Transaction implements ArrayAccess
     {
         $this->rlp = new RLP;
         $this->secp256k1 = new EC('secp256k1');
-        $tx = [];
+        $this->util = new Util;
 
         if (is_array($txData)) {
             foreach ($txData as $key => $data) {
-                $txKey = isset($this->map[$key]) ? $this->map[$key] : null;
-    
-                if (is_int($txKey)) {
-                    $tx[$txKey] = $data;
-                }
+                $this->offsetSet($key, $data);
             }
         } elseif (is_string($txData)) {
-            if (strpos($txData, '0x') === 0) {
+            $tx = [];
+
+            if ($this->util->isHex($txData)) {
                 $txData = $this->rlp->decode($txData);
 
                 foreach ($txData as $txKey => $data) {
@@ -112,8 +158,8 @@ class Transaction implements ArrayAccess
                     }
                 }
             }
+            $this->txData = $tx;
         }
-        $this->txData = $tx;
     }
 
     /**
@@ -168,10 +214,35 @@ class Transaction implements ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        $txKey = isset($this->map[$offset]) ? $this->map[$offset] : null;
+        $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
-        if (is_int($txKey)) {
-            $this->txData[$txKey] = $value;
+        if (is_array($txKey)) {
+            $checkedValue = ($value) ? (string) $value : '';
+            $isHex = $this->util->isHex($checkedValue);
+            $checkedValue = $this->util->stripZero($checkedValue);
+
+            if (!isset($txKey['allowLess']) || (isset($txKey['allowLess']) && $txKey['allowLess'] === false)) {
+                // check length
+                if (isset($txKey['length'])) {
+                    if ($isHex) {
+                        if (strlen($checkedValue) > $txKey['length'] * 2) {
+                            throw new InvalidArgumentException($offset . ' exceeds the length limit.');
+                        }
+                    } else {
+                        if (strlen($checkedValue) > $txKey['length']) {
+                            throw new InvalidArgumentException($offset . ' exceeds the length limit.');
+                        }
+                    }
+                }
+            }
+            if (!isset($txKey['allowZero']) || (isset($txKey['allowZero']) && $txKey['allowZero'] === false)) {
+                // check zero, 0x0
+                if ($checkedValue === '0' && ($value === 0 || $value === '0x0' || $value === '0x')){
+                    // set value to empty string
+                    $value = '';
+                }
+            }
+            $this->txData[$txKey['key']] = $value;
         }
     }
 
@@ -183,10 +254,10 @@ class Transaction implements ArrayAccess
      */
     public function offsetExists($offset)
     {
-        $txKey = isset($this->map[$offset]) ? $this->map[$offset] : null;
+        $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
-        if (is_int($txKey)) {
-            return isset($this->txData[$txKey]);
+        if (is_array($txKey)) {
+            return isset($this->txData[$txKey['key']]);
         }
         return false;
     }
@@ -199,10 +270,10 @@ class Transaction implements ArrayAccess
      */
     public function offsetUnset($offset)
     {
-        $txKey = isset($this->map[$offset]) ? $this->map[$offset] : null;
+        $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
-        if (is_int($txKey) && isset($this->txData[$txKey])) {
-            unset($this->txData[$txKey]);
+        if (is_array($txKey) && isset($this->txData[$txKey['key']])) {
+            unset($this->txData[$txKey['key']]);
         }
     }
 
@@ -214,10 +285,10 @@ class Transaction implements ArrayAccess
      */
     public function offsetGet($offset)
     {
-        $txKey = isset($this->map[$offset]) ? $this->map[$offset] : null;
+        $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
-        if (is_int($txKey) && isset($this->txData[$txKey])) {
-            return $this->txData[$txKey];
+        if (is_array($txKey) && isset($this->txData[$txKey['key']])) {
+            return $this->txData[$txKey['key']];
         }
         return null;
     }
@@ -230,23 +301,6 @@ class Transaction implements ArrayAccess
     public function getTxData()
     {
         return $this->txData;
-    }
-
-    /**
-     * sha3
-     * keccak256
-     * 
-     * @param string $value
-     * @return string
-     */
-    public function sha3(string $value)
-    {
-        $hash = Keccak::hash($value, 256);
-
-        if ($hash === $this::SHA3_NULL_HASH) {
-            return null;
-        }
-        return $hash;
     }
 
     /**
@@ -344,7 +398,7 @@ class Transaction implements ArrayAccess
         }
         $serializedTx = $this->rlp->encode($txData)->toString('utf8');
 
-        return $this->sha3($serializedTx);
+        return $this->util->sha3($serializedTx);
     }
 
     /**
@@ -383,7 +437,7 @@ class Transaction implements ArrayAccess
         } else {
             $publicKey = $this->privateKey->getPublic(false, 'hex');
         }
-        $from = '0x' . substr($this->sha3(substr(hex2bin($publicKey), 1)), 24);
+        $from = '0x' . substr($this->util->sha3(substr(hex2bin($publicKey), 1)), 24);
 
         $this->offsetSet('from', $from);
         return $from;

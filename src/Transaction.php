@@ -36,32 +36,37 @@ class Transaction implements ArrayAccess
         'nonce' => [
             'key' => 0,
             'length' => 32,
-            'allowLess' => true
+            'allowLess' => true,
+            'allowZero' => true
         ],
         'gasPrice' => [
             'key' => 1,
             'length' => 32,
-            'allowLess' => true
+            'allowLess' => true,
+            'allowZero' => true
         ],
         'gasLimit' => [
             'key' => 2,
             'length' => 32,
-            'allowLess' => true
+            'allowLess' => true,
+            'allowZero' => true
         ],
         'gas' => [
             'key' => 2,
             'length' => 32,
-            'allowLess' => true
+            'allowLess' => true,
+            'allowZero' => true
         ],
         'to' => [
             'key' => 3,
             'length' => 20,
-            'allowZero' => true
+            'allowZero' => true,
         ],
         'value' => [
             'key' => 4,
             'length' => 32,
-            'allowLess' => true
+            'allowLess' => true,
+            'allowZero' => false
         ],
         'data' => [
             'key' => 5,
@@ -130,18 +135,15 @@ class Transaction implements ArrayAccess
         $this->rlp = new RLP;
         $this->secp256k1 = new EC('secp256k1');
         $this->util = new Util;
-        $tx = [];
 
         if (is_array($txData)) {
             foreach ($txData as $key => $data) {
-                $txKey = isset($this->attributeMap[$key]) ? $this->attributeMap[$key] : null;
-    
-                if (is_array($txKey)) {
-                    $tx[$txKey['key']] = $data;
-                }
+                $this->offsetSet($key, $data);
             }
         } elseif (is_string($txData)) {
-            if (strpos($txData, '0x') === 0) {
+            $tx = [];
+
+            if ($this->util->isHex($txData)) {
                 $txData = $this->rlp->decode($txData);
 
                 foreach ($txData as $txKey => $data) {
@@ -156,8 +158,8 @@ class Transaction implements ArrayAccess
                     }
                 }
             }
+            $this->txData = $tx;
         }
-        $this->txData = $tx;
     }
 
     /**
@@ -215,6 +217,31 @@ class Transaction implements ArrayAccess
         $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
         if (is_array($txKey)) {
+            $checkedValue = ($value) ? (string) $value : '';
+            $isHex = $this->util->isHex($checkedValue);
+            $checkedValue = $this->util->stripZero($checkedValue);
+
+            if (!isset($txKey['allowLess']) || (isset($txKey['allowLess']) && $txKey['allowLess'] === false)) {
+                // check length
+                if (isset($txKey['length'])) {
+                    if ($isHex) {
+                        if (strlen($checkedValue) > $txKey['length'] * 2) {
+                            throw new InvalidArgumentException($offset . ' exceeds the length limit.');
+                        }
+                    } else {
+                        if (strlen($checkedValue) > $txKey['length']) {
+                            throw new InvalidArgumentException($offset . ' exceeds the length limit.');
+                        }
+                    }
+                }
+            }
+            if (!isset($txKey['allowZero']) || (isset($txKey['allowZero']) && $txKey['allowZero'] === false)) {
+                // check zero, 0x0
+                if ($checkedValue === '0' && ($value === 0 || $value === '0x0' || $value === '0x')){
+                    // set value to empty string
+                    $value = '';
+                }
+            }
             $this->txData[$txKey['key']] = $value;
         }
     }

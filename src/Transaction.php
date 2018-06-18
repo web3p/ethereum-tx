@@ -37,25 +37,25 @@ class Transaction implements ArrayAccess
             'key' => 0,
             'length' => 32,
             'allowLess' => true,
-            'allowZero' => true
+            'allowZero' => false
         ],
         'gasPrice' => [
             'key' => 1,
             'length' => 32,
             'allowLess' => true,
-            'allowZero' => true
+            'allowZero' => false
         ],
         'gasLimit' => [
             'key' => 2,
             'length' => 32,
             'allowLess' => true,
-            'allowZero' => true
+            'allowZero' => false
         ],
         'gas' => [
             'key' => 2,
             'length' => 32,
             'allowLess' => true,
-            'allowZero' => true
+            'allowZero' => false
         ],
         'to' => [
             'key' => 3,
@@ -236,8 +236,8 @@ class Transaction implements ArrayAccess
                 }
             }
             if (!isset($txKey['allowZero']) || (isset($txKey['allowZero']) && $txKey['allowZero'] === false)) {
-                // check zero, 0x0
-                if ($checkedValue === '0' && ($value === 0 || $value === '0x0' || $value === '0x')){
+                // check zero
+                if (preg_match('/^0*$/', $checkedValue) === 1) {
                     // set value to empty string
                     $value = '';
                 }

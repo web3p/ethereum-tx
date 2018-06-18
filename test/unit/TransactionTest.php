@@ -286,4 +286,36 @@ class TransactionTest extends TestCase
         $this->assertEquals($fromA, $fromB);
         $this->assertEquals($fromB, $fromC);
     }
+
+    /**
+     * testIssue15
+     * 
+     * @return void
+     */
+    public function testIssue15()
+    {
+        $signedTransactions = [];
+        $nonces = [
+            '0x00', '0x0', 0, '0x000', '0'
+        ];
+
+        // push signed transaction
+        for ($i=0; $i<count($nonces); $i++) {
+            $transaction = new Transaction([
+                'nonce' => $nonces[$i],
+                'to' => '0x3535353535353535353535353535353535353535',
+                'gas' => '0x5208',
+                'gasPrice' => '0x4a817c800',
+                'value' => '0x0',
+                'chainId' => 1,
+                'data' => ''
+            ]);
+            $signedTransactions[] = $transaction->sign('0x4646464646464646464646464646464646464646464646464646464646464646');
+        }
+
+        // compare each signed transaction
+        for ($i=1; $i<count($signedTransactions); $i++) {
+            $this->assertEquals($signedTransactions[0], $signedTransactions[$i]);
+        }
+    }
 }

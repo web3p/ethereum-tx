@@ -10,7 +10,7 @@
          stopOnFailure="false"
          syntaxCheck="false">
 
-    <testsuite name="Web3.php unit test">
+    <testsuite name="Ethereum tx unit test">
         <directory suffix="Test.php">./test/unit</directory>
     </testsuite>
 

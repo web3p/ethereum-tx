@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3b50f815b94eb0d88232cb1245907ad6",
+    "content-hash": "de28da405ac699ffb57506b1f832536f",
     "packages": [
         {
             "name": "kornrunner/keccak",
@@ -128,16 +128,16 @@
         },
         {
             "name": "simplito/elliptic-php",
-            "version": "1.0.3",
+            "version": "1.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/simplito/elliptic-php.git",
-                "reference": "cab829d270dfd6acdff8383d862ed02a12d1f9dd"
+                "reference": "15652609aa55968d56685c2a9120535ccdc00fd9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/simplito/elliptic-php/zipball/cab829d270dfd6acdff8383d862ed02a12d1f9dd",
-                "reference": "cab829d270dfd6acdff8383d862ed02a12d1f9dd",
+                "url": "https://api.github.com/repos/simplito/elliptic-php/zipball/15652609aa55968d56685c2a9120535ccdc00fd9",
+                "reference": "15652609aa55968d56685c2a9120535ccdc00fd9",
                 "shasum": ""
             },
             "require": {
@@ -184,7 +184,7 @@
                 "nistp521",
                 "secp256k1"
             ],
-            "time": "2018-04-12T11:17:52+00:00"
+            "time": "2019-11-14T13:43:07+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -247,22 +247,22 @@
         },
         {
             "name": "web3p/ethereum-util",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/web3p/ethereum-util.git",
-                "reference": "4e5ef4dc4d60f7c8939f9f4da6f8dff5d51a2e91"
+                "reference": "c7b5edd1a3ca20d0dae93f6fb9d253c61dfb73c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/web3p/ethereum-util/zipball/4e5ef4dc4d60f7c8939f9f4da6f8dff5d51a2e91",
-                "reference": "4e5ef4dc4d60f7c8939f9f4da6f8dff5d51a2e91",
+                "url": "https://api.github.com/repos/web3p/ethereum-util/zipball/c7b5edd1a3ca20d0dae93f6fb9d253c61dfb73c6",
+                "reference": "c7b5edd1a3ca20d0dae93f6fb9d253c61dfb73c6",
                 "shasum": ""
             },
             "require": {
                 "kornrunner/keccak": "~1",
                 "php": "^7.1",
-                "simplito/elliptic-php": "1.0.3"
+                "simplito/elliptic-php": "~1.0.6"
             },
             "require-dev": {
                 "phpunit/phpunit": "^6.1"
@@ -284,7 +284,7 @@
                 }
             ],
             "description": "A collection of utility functions for Ethereum written in PHP.",
-            "time": "2018-08-17T06:28:32+00:00"
+            "time": "2019-11-23T08:43:24+00:00"
         },
         {
             "name": "web3p/rlp",

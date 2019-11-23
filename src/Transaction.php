@@ -148,7 +148,7 @@ class Transaction implements ArrayAccess
 
                 foreach ($txData as $txKey => $data) {
                     if (is_int($txKey)) {
-                        $hexData = $data->toString('hex');
+                        $hexData = $data;
 
                         if (strlen($hexData) > 0) {
                             $tx[$txKey] = '0x' . $hexData;
@@ -357,7 +357,7 @@ class Transaction implements ArrayAccess
         $this->offsetSet('v', $v);
         $this->privateKey = $privateKey;
 
-        return $this->serialize()->toString('hex');
+        return $this->serialize();
     }
 
     /**
@@ -396,9 +396,9 @@ class Transaction implements ArrayAccess
             }
             $this->txData = $rawTxData;
         }
-        $serializedTx = $this->rlp->encode($txData)->toString('utf8');
+        $serializedTx = $this->rlp->encode($txData);
 
-        return $this->util->sha3($serializedTx);
+        return $this->util->sha3(hex2bin($serializedTx));
     }
 
     /**

@@ -202,10 +202,10 @@ class Transaction implements ArrayAccess
     /**
      * Return the value in the transaction with given key or return the protected property value if get(property_name} function is existed.
      * 
-     * @param string key or protected property name
+     * @param string $name key or protected property name
      * @return mixed
      */
-    public function __get($name)
+    public function __get(string $name)
     {
         $method = 'get' . ucfirst($name);
 
@@ -218,11 +218,11 @@ class Transaction implements ArrayAccess
     /**
      * Set the value in the transaction with given key or return the protected value if set(property_name} function is existed.
      * 
-     * @param string key, eg: to
+     * @param string $name key, eg: to
      * @param mixed value
      * @return void
      */
-    public function __set($name, $value)
+    public function __set(string $name, $value)
     {
         $method = 'set' . ucfirst($name);
 
@@ -245,7 +245,7 @@ class Transaction implements ArrayAccess
     /**
      * Set the value in the transaction with given key.
      * 
-     * @param string key, eg: to
+     * @param string $offset key, eg: to
      * @param string value
      * @return void
      */
@@ -286,7 +286,7 @@ class Transaction implements ArrayAccess
     /**
      * Return whether the value is in the transaction with given key.
      * 
-     * @param string key, eg: to
+     * @param string $offset key, eg: to
      * @return bool
      */
     public function offsetExists($offset)
@@ -302,7 +302,7 @@ class Transaction implements ArrayAccess
     /**
      * Unset the value in the transaction with given key.
      * 
-     * @param string key, eg: to
+     * @param string $offset key, eg: to
      * @return void
      */
     public function offsetUnset($offset)
@@ -317,7 +317,7 @@ class Transaction implements ArrayAccess
     /**
      * Return the value in the transaction with given key.
      * 
-     * @param string key, eg: to 
+     * @param string $offset key, eg: to 
      * @return mixed value of the transaction
      */
     public function offsetGet($offset)
@@ -369,10 +369,10 @@ class Transaction implements ArrayAccess
     /**
      * Sign the transaction with given hex encoded private key.
      * 
-     * @param string hex encoded private key
+     * @param string $privateKey hex encoded private key
      * @return string hex encoded signed ethereum transaction
      */
-    public function sign($privateKey)
+    public function sign(string $privateKey)
     {
         $txHash = $this->hash(false);
         $ecPrivateKey = $this->secp256k1->keyFromPrivate($privateKey, 'hex');
@@ -400,10 +400,10 @@ class Transaction implements ArrayAccess
     /**
      * Return hash of the ethereum transaction with/without signature.
      *
-     * @param bool hash with signature
+     * @param bool $includeSignature hash with signature
      * @return string hex encoded hash of the ethereum transaction
      */
-    public function hash($includeSignature=false)
+    public function hash(bool $includeSignature=false)
     {
         $chainId = $this->offsetGet('chainId');
 

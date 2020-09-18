@@ -131,7 +131,7 @@ class Transaction implements ArrayAccess
      * 
      * @var array
      */
-    protected $txData;
+    protected $txData = [];
 
     /**
      * RLP encoding instance

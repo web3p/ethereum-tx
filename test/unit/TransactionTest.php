@@ -318,4 +318,21 @@ class TransactionTest extends TestCase
             $this->assertEquals($signedTransactions[0], $signedTransactions[$i]);
         }
     }
+
+    /**
+     * testIssue26
+     * default $txData should be empty array
+     * 
+     * @return void
+     */
+    public function testIssue26()
+    {
+        $tests = [
+            null, [], [null]
+        ];
+        for ($i=0; $i<count($tests); $i++) {
+            $transaction = new Transaction($tests[$i]);
+            $this->assertEquals($transaction->txData, []);
+        }
+    }
 }

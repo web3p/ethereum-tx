@@ -149,6 +149,18 @@ class TransactionTest extends TestCase
             'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
         ]);
         $this->assertEquals('f892018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567523a0a48d3ce9c68bb49825aea5335bd07432823e858e8a504767d08290c28aafddf8a0416c7abc3a67080db0ad07c42de82db4e05518f99595119677398c68d431ab37', $transaction->sign($this->testPrivateKey));
+
+        // test different private keys
+        $tests = [
+            'fake private key', '0xd0459987fdde1f41e524fddbf4b646cd9d3bea7fd7d63feead3f5dfce6174a3d', 'd0459987fdde1f41e524fddbf4b646cd9d3bea7fd7d63feead3f5dfce6174a3d', 'd0459987fdde1f41e524fddbf4b646cd9d3bea7fd7d63feead3f5dfce6174a'
+        ];
+        for ($i=0; $i<count($tests); $i++) {
+            try {
+                $transaction->sign($tests[$i]);
+            } catch (\InvalidArgumentException $e) {
+                $this->assertEquals('Private key should be hex encoded string', $e->getMessage());
+            }
+        }
     }
 
     /**

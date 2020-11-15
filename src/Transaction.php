@@ -374,8 +374,13 @@ class Transaction implements ArrayAccess
      */
     public function sign(string $privateKey)
     {
+        if ($this->util->isHex($privateKey)) {
+            $privateKey = $this->util->stripZero($privateKey);
+            $ecPrivateKey = $this->secp256k1->keyFromPrivate($privateKey, 'hex');
+        } else {
+            throw new InvalidArgumentException('Private key should be hex encoded string');
+        }
         $txHash = $this->hash(false);
-        $ecPrivateKey = $this->secp256k1->keyFromPrivate($privateKey, 'hex');
         $signature = $ecPrivateKey->sign($txHash, [
             'canonical' => true
         ]);

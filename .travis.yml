@@ -6,16 +6,10 @@ php:
   - 7.1
   - 7.2
   - 7.3
+  - 7.4
 
 install:
   - composer install
-
-notifications:
-  email:
-    recipients:
-      - alk03073135@gmail.com
-    on_success: always
-    on_failure: always
 
 script:
   - vendor/bin/phpunit --coverage-clover=coverage.xml

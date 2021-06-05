@@ -26,7 +26,7 @@ class TestCase extends BaseTestCase
      * 
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->rlp = new RLP;
     }
@@ -36,5 +36,5 @@ class TestCase extends BaseTestCase
      * 
      * @return void
      */
-    public function tearDown() {}
+    public function tearDown(): void {}
 }

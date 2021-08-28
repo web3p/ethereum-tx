@@ -70,6 +70,11 @@ class Transaction implements ArrayAccess
         'chainId' => [
             'key' => -2
         ],
+        'transactionType' => [
+            'key' => -3,
+            'length' => 2,
+            'allowZero' => true
+        ],
         'nonce' => [
             'key' => 0,
             'length' => 32,
@@ -181,6 +186,15 @@ class Transaction implements ArrayAccess
             $tx = [];
 
             if ($this->util->isHex($txData)) {
+                // check first byte
+                $txData = $this->util->stripZero($txData);
+                $firstByteStr = substr($txData, 0, 2);
+                $firstByte = hexdec($firstByteStr);
+                if ($firstByte >= 0 && $firstByte <= 127) {
+                    // first byte is transaction type
+                    $tx[$this->attributeMap['transactionType']['key']] = $firstByteStr;
+                    $txData = substr($txData, 2);
+                }
                 $txData = $this->rlp->decode($txData);
 
                 foreach ($txData as $txKey => $data) {
@@ -341,6 +355,17 @@ class Transaction implements ArrayAccess
     }
 
     /**
+     * Return whether transaction type is valid (0x0 <= $transactionType <= 0x7f).
+     * 
+     * @param integer $transactionType
+     * @return boolean is transaction valid
+     */
+    protected function isTransactionTypeValid(int $transactionType)
+    {
+        return $transactionType >= 0 && $transactionType <= 127;
+    }
+
+    /**
      * RLP serialize the ethereum transaction.
      * 
      * @return \Web3p\RLP\RLP\Buffer serialized ethereum transaction
@@ -361,6 +386,18 @@ class Transaction implements ArrayAccess
         foreach ($this->txData as $key => $data) {
             if ($key >= 0) {
                 $txData[$key] = $data;
+            }
+        }
+        $transactionType = $this->offsetGet('transactionType');
+        if (
+            $transactionType
+        ) {
+            $transactionType = $this->util->stripZero($transactionType);
+            if ($this->isTransactionTypeValid(hexdec($transactionType))) {
+                if (strlen($transactionType) % 2 != 0) {
+                    $transactionType = '0' . $transactionType;
+                }
+                return $transactionType . $this->rlp->encode($txData);
             }
         }
         return $this->rlp->encode($txData);

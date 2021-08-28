@@ -347,4 +347,28 @@ class TransactionTest extends TestCase
             $this->assertEquals($transaction->txData, []);
         }
     }
+
+    /**
+     * testEIP2718
+     * see: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2718.md
+     * 
+     * @return void
+     */
+    public function testEIP2718()
+    {
+        $transaction = new Transaction([
+            'transactionType' => '0x0',
+            'nonce' => '0x09',
+            'to' => '0x3535353535353535353535353535353535353535',
+            'gas' => '0x5208',
+            'gasPrice' => '0x4a817c800',
+            'value' => '0x0',
+            'chainId' => 1,
+            'data' => ''
+        ]);
+        $this->assertEquals('00f864098504a817c800825208943535353535353535353535353535353535353535808025a0855ec9b7d4fcabf535fe4ac4a7c31a9e521214d05bc6efbc058d4757c35e92bba0043d7df30c8a79e5522b3de8fc169df5fa7145714100ee8ec413292d97ce4d3a', $transaction->sign('0x4646464646464646464646464646464646464646464646464646464646464646'));
+
+        $transaction = new Transaction('0x00f86c098504a817c800825208943535353535353535353535353535353535353535880de0b6b3a76400008025a028ef61340bd939bc2195fe537567866003e1a15d3c71ff63e1590620aa636276a067cbe9d8997f761aecb703304b3800ccf555c9f3dc64214b297fb1966a3b6d83');
+        $this->assertEquals('00f86c098504a817c800825208943535353535353535353535353535353535353535880de0b6b3a76400008025a028ef61340bd939bc2195fe537567866003e1a15d3c71ff63e1590620aa636276a067cbe9d8997f761aecb703304b3800ccf555c9f3dc64214b297fb1966a3b6d83', $transaction->serialize());
+    }
 }

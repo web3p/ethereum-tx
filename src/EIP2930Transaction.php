@@ -23,7 +23,7 @@ use Web3p\EthereumUtil\Util;
  * It's a instance for generating/serializing ethereum transaction.
  * 
  * ```php
- * use Web3p\EthereumTx\Transaction;
+ * use Web3p\EthereumTx\EIP2930Transaction;
  * 
  * // generate transaction instance with transaction parameters
  * $transaction = new Transaction([
@@ -33,7 +33,8 @@ use Web3p\EthereumUtil\Util;
  *     'gas' => '0x76c0',
  *     'gasPrice' => '0x9184e72a000',
  *     'value' => '0x9184e72a',
- *     'chainId' => 1, // optional
+ *     'chainId' => 1, // required
+ *     'accessList' => [],
  *     'data' => '0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675'
  * ]);
  * 
@@ -56,7 +57,7 @@ use Web3p\EthereumUtil\Util;
  * @link https://www.web3p.xyz
  * @filesource https://github.com/web3p/ethereum-tx
  */
-class Transaction implements ArrayAccess
+class EIP2930Transaction implements ArrayAccess
 {
     /**
      * Attribute map for keeping order of transaction key/value
@@ -68,59 +69,65 @@ class Transaction implements ArrayAccess
             'key' => -1
         ],
         'chainId' => [
-            'key' => -2
+            'key' => 0
         ],
         'nonce' => [
-            'key' => 0,
-            'length' => 32,
-            'allowLess' => true,
-            'allowZero' => false
-        ],
-        'gasPrice' => [
             'key' => 1,
             'length' => 32,
             'allowLess' => true,
             'allowZero' => false
         ],
-        'gasLimit' => [
+        'gasPrice' => [
             'key' => 2,
+            'length' => 32,
+            'allowLess' => true,
+            'allowZero' => false
+        ],
+        'gasLimit' => [
+            'key' => 3,
             'length' => 32,
             'allowLess' => true,
             'allowZero' => false
         ],
         'gas' => [
-            'key' => 2,
+            'key' => 3,
             'length' => 32,
             'allowLess' => true,
             'allowZero' => false
         ],
         'to' => [
-            'key' => 3,
+            'key' => 4,
             'length' => 20,
             'allowZero' => true,
         ],
         'value' => [
-            'key' => 4,
+            'key' => 5,
             'length' => 32,
             'allowLess' => true,
             'allowZero' => false
         ],
         'data' => [
-            'key' => 5,
+            'key' => 6,
             'allowLess' => true,
             'allowZero' => true
         ],
+        'accessList' => [
+            'key' => 7,
+            'allowLess' => true,
+            'allowZero' => true,
+            'allowArray' => true
+        ],
         'v' => [
-            'key' => 6,
+            'key' => 8,
             'allowZero' => true
         ],
         'r' => [
-            'key' => 7,
+            'key' => 9,
             'length' => 32,
             'allowZero' => true
         ],
         's' => [
-            'key' => 8,
+            'key' => 10,
             'length' => 32,
             'allowZero' => true
         ]
@@ -162,6 +169,13 @@ class Transaction implements ArrayAccess
     protected $util;
 
     /**
+     * Transaction type
+     * 
+     * @var string
+     */
+    protected $transactionType = '01';
+
+    /**
      * construct
      * 
      * @param array|string $txData
@@ -181,16 +195,21 @@ class Transaction implements ArrayAccess
             $tx = [];
 
             if ($this->util->isHex($txData)) {
+                // check first byte
+                $txData = $this->util->stripZero($txData);
+                $firstByteStr = substr($txData, 0, 2);
+                $firstByte = hexdec($firstByteStr);
+                if ($this->isTransactionTypeValid($firstByte)) {
+                    $txData = substr($txData, 2);
+                }
                 $txData = $this->rlp->decode($txData);
 
                 foreach ($txData as $txKey => $data) {
                     if (is_int($txKey)) {
-                        $hexData = $data;
-
-                        if (strlen($hexData) > 0) {
-                            $tx[$txKey] = '0x' . $hexData;
+                        if (is_string($data) && strlen($data) > 0) {
+                            $tx[$txKey] = '0x' . $data;
                         } else {
-                            $tx[$txKey] = $hexData;
+                            $tx[$txKey] = $data;
                         }
                     }
                 }
@@ -254,29 +273,54 @@ class Transaction implements ArrayAccess
         $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
         if (is_array($txKey)) {
-            $checkedValue = ($value) ? (string) $value : '';
-            $isHex = $this->util->isHex($checkedValue);
-            $checkedValue = $this->util->stripZero($checkedValue);
-
-            if (!isset($txKey['allowLess']) || (isset($txKey['allowLess']) && $txKey['allowLess'] === false)) {
-                // check length
-                if (isset($txKey['length'])) {
-                    if ($isHex) {
-                        if (strlen($checkedValue) > $txKey['length'] * 2) {
-                            throw new InvalidArgumentException($offset . ' exceeds the length limit.');
-                        }
-                    } else {
-                        if (strlen($checkedValue) > $txKey['length']) {
+            if (is_array($value)) {
+                if (!isset($txKey['allowArray']) || (isset($txKey['allowArray']) && $txKey['allowArray'] === false)) {
+                    throw new InvalidArgumentException($offset . ' should\'t be array.');
+                }
+                if (!isset($txKey['allowLess']) || (isset($txKey['allowLess']) && $txKey['allowLess'] === false)) {
+                    // check length
+                    if (isset($txKey['length'])) {
+                        if (count($value) > $txKey['length'] * 2) {
                             throw new InvalidArgumentException($offset . ' exceeds the length limit.');
                         }
                     }
                 }
-            }
-            if (!isset($txKey['allowZero']) || (isset($txKey['allowZero']) && $txKey['allowZero'] === false)) {
-                // check zero
-                if (preg_match('/^0*$/', $checkedValue) === 1) {
-                    // set value to empty string
-                    $value = '';
+                if (!isset($txKey['allowZero']) || (isset($txKey['allowZero']) && $txKey['allowZero'] === false)) {
+                    // check zero
+                    foreach ($value as $key => $v) {
+                        $checkedV = $v ? (string) $v : '';
+                        if (preg_match('/^0*$/', $checkedV) === 1) {
+                            // set value to empty string
+                            $checkedV = '';
+                            $value[$key] = $checkedV;
+                        }
+                    }
+                }
+            } else {
+                $checkedValue = ($value) ? (string) $value : '';
+                $isHex = $this->util->isHex($checkedValue);
+                $checkedValue = $this->util->stripZero($checkedValue);
+
+                if (!isset($txKey['allowLess']) || (isset($txKey['allowLess']) && $txKey['allowLess'] === false)) {
+                    // check length
+                    if (isset($txKey['length'])) {
+                        if ($isHex) {
+                            if (strlen($checkedValue) > $txKey['length'] * 2) {
+                                throw new InvalidArgumentException($offset . ' exceeds the length limit.');
+                            }
+                        } else {
+                            if (strlen($checkedValue) > $txKey['length']) {
+                                throw new InvalidArgumentException($offset . ' exceeds the length limit.');
+                            }
+                        }
+                    }
+                }
+                if (!isset($txKey['allowZero']) || (isset($txKey['allowZero']) && $txKey['allowZero'] === false)) {
+                    // check zero
+                    if (preg_match('/^0*$/', $checkedValue) === 1) {
+                        // set value to empty string
+                        $value = '';
+                    }
                 }
             }
             $this->txData[$txKey['key']] = $value;
@@ -341,6 +385,17 @@ class Transaction implements ArrayAccess
     }
 
     /**
+     * Return whether transaction type is valid (0x0 <= $transactionType <= 0x7f).
+     * 
+     * @param integer $transactionType
+     * @return boolean is transaction valid
+     */
+    protected function isTransactionTypeValid(int $transactionType)
+    {
+        return $transactionType >= 0 && $transactionType <= 127;
+    }
+
+    /**
      * RLP serialize the ethereum transaction.
      * 
      * @return \Web3p\RLP\RLP\Buffer serialized ethereum transaction
@@ -354,16 +409,17 @@ class Transaction implements ArrayAccess
             throw new RuntimeException('Cannot sort tx data by keys.');
         }
         if ($chainId && $chainId > 0) {
-            $txData = array_fill(0, 9, '');
+            $txData = array_fill(0, 11, '');
         } else {
-            $txData = array_fill(0, 6, '');
+            $txData = array_fill(0, 8, '');
         }
         foreach ($this->txData as $key => $data) {
             if ($key >= 0) {
                 $txData[$key] = $data;
             }
         }
-        return $this->rlp->encode($txData);
+        $transactionType = $this->transactionType;
+        return $transactionType . $this->rlp->encode($txData);
     }
 
     /**
@@ -380,19 +436,13 @@ class Transaction implements ArrayAccess
         } else {
             throw new InvalidArgumentException('Private key should be hex encoded string');
         }
-        $txHash = $this->hash(false);
+        $txHash = $this->hash();
         $signature = $ecPrivateKey->sign($txHash, [
             'canonical' => true
         ]);
         $r = $signature->r;
         $s = $signature->s;
-        $v = $signature->recoveryParam + 35;
-
-        $chainId = $this->offsetGet('chainId');
-
-        if ($chainId && $chainId > 0) {
-            $v += (int) $chainId * 2;
-        }
+        $v = $signature->recoveryParam;
 
         $this->offsetSet('r', '0x' . $r->toString(16));
         $this->offsetSet('s', '0x' . $s->toString(16));
@@ -405,10 +455,9 @@ class Transaction implements ArrayAccess
     /**
      * Return hash of the ethereum transaction with/without signature.
      *
-     * @param bool $includeSignature hash with signature
      * @return string hex encoded hash of the ethereum transaction
      */
-    public function hash(bool $includeSignature=false)
+    public function hash()
     {
         $chainId = $this->offsetGet('chainId');
 
@@ -416,31 +465,15 @@ class Transaction implements ArrayAccess
         if (ksort($this->txData) !== true) {
             throw new RuntimeException('Cannot sort tx data by keys.');
         }
-        if ($includeSignature) {
-            $txData = $this->txData;
-        } else {
-            $rawTxData = $this->txData;
-
-            if ($chainId && $chainId > 0) {
-                $v = (int) $chainId;
-                $this->offsetSet('r', '');
-                $this->offsetSet('s', '');
-                $this->offsetSet('v', $v);
-                $txData = array_fill(0, 9, '');
-            } else {
-                $txData = array_fill(0, 6, '');
+        $rawTxData = array_fill(0, 8, '');
+        foreach ($this->txData as $key => $data) {
+            if ($key >= 0 && $key < 8) {
+                $rawTxData[$key] = $data;
             }
-
-            foreach ($this->txData as $key => $data) {
-                if ($key >= 0) {
-                    $txData[$key] = $data;
-                }
-            }
-            $this->txData = $rawTxData;
         }
-        $serializedTx = $this->rlp->encode($txData);
-
-        return $this->util->sha3(hex2bin($serializedTx));
+        $serializedTx = $this->rlp->encode($rawTxData);
+        $transactionType = $this->transactionType;
+        return $this->util->sha3(hex2bin($transactionType . $serializedTx));
     }
 
     /**
@@ -460,17 +493,11 @@ class Transaction implements ArrayAccess
             $r = $this->offsetGet('r');
             $s = $this->offsetGet('s');
             $v = $this->offsetGet('v');
-            $chainId = $this->offsetGet('chainId');
 
             if (!$r || !$s) {
                 throw new RuntimeException('Invalid signature r and s.');
             }
-            $txHash = $this->hash(false);
-
-            if ($chainId && $chainId > 0) {
-                $v -= ($chainId * 2);
-            }
-            $v -= 35;
+            $txHash = $this->hash();
             $publicKey = $this->secp256k1->recoverPubKey($txHash, [
                 'r' => $r,
                 's' => $s

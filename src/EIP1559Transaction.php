@@ -213,18 +213,24 @@ class EIP1559Transaction extends TypeTransaction
     /**
      * Return hash of the ethereum transaction with/without signature.
      *
+     * @param bool $includeSignature hash with signature
      * @return string hex encoded hash of the ethereum transaction
      */
-    public function hash()
+    public function hash(bool $includeSignature=false)
     {
         // sort tx data
         if (ksort($this->txData) !== true) {
             throw new RuntimeException('Cannot sort tx data by keys.');
         }
-        $rawTxData = array_fill(0, 9, '');
-        foreach ($this->txData as $key => $data) {
-            if ($key >= 0 && $key < 9) {
-                $rawTxData[$key] = $data;
+        if ($includeSignature) {
+            $length = 12;
+        } else {
+            $length = 9;
+        }
+        $rawTxData = array_fill(0, $length, '');
+        for ($key = 0; $key < $length; $key++) {
+            if (isset($this->txData[$key])) {
+                $rawTxData[$key] = $this->txData[$key];
             }
         }
         $serializedTx = $this->rlp->encode($rawTxData);

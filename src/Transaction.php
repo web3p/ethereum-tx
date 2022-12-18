@@ -68,7 +68,8 @@ class Transaction implements ArrayAccess
             'key' => -1
         ],
         'chainId' => [
-            'key' => -2
+            'key' => -2,
+            'formatInteger' => true
         ],
         'nonce' => [
             'key' => 0,
@@ -112,7 +113,8 @@ class Transaction implements ArrayAccess
         ],
         'v' => [
             'key' => 6,
-            'allowZero' => true
+            'allowZero' => true,
+            'formatInteger' => true
         ],
         'r' => [
             'key' => 7,
@@ -229,7 +231,7 @@ class Transaction implements ArrayAccess
         if (method_exists($this, $method)) {
             return call_user_func_array([$this, $method], [$value]);
         }
-        return $this->offsetSet($name, $value);
+        $this->offsetSet($name, $value);
     }
 
     /**
@@ -277,6 +279,14 @@ class Transaction implements ArrayAccess
                 if (preg_match('/^0*$/', $checkedValue) === 1) {
                     // set value to empty string
                     $value = '';
+                }
+            }
+            if (isset($txKey['formatInteger']) && $txKey['formatInteger'] === true) {
+                $bnValue = $this->util->toBn($value);
+                if (is_array($bnValue)) {
+                    $value = 0;
+                } else {
+                    $value = (int) $bnValue->toString();
                 }
             }
             $this->txData[$txKey['key']] = $value;
@@ -391,7 +401,7 @@ class Transaction implements ArrayAccess
         $chainId = $this->offsetGet('chainId');
 
         if ($chainId && $chainId > 0) {
-            $v += (int) $chainId * 2;
+            $v += $chainId * 2;
         }
 
         $this->offsetSet('r', '0x' . $r->toString(16));
@@ -422,7 +432,7 @@ class Transaction implements ArrayAccess
             $rawTxData = $this->txData;
 
             if ($chainId && $chainId > 0) {
-                $v = (int) $chainId;
+                $v = $chainId;
                 $this->offsetSet('r', '');
                 $this->offsetSet('s', '');
                 $this->offsetSet('v', $v);

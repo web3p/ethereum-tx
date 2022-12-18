@@ -219,11 +219,22 @@ class TransactionTest extends TestCase
             'gas' => '0x5208',
             'gasPrice' => '0x4a817c800',
             'value' => '0xde0b6b3a7640000',
-            'chainId' => 1,
+            'chainId' => 0x1,
             'data' => ''
         ]);
         $this->assertEquals('daf5a779ae972f972197303d7b574746c7ef83eadac0f2791ad23db92e4c8e53', $transaction->hash(false));
         $this->assertEquals('f86c098504a817c800825208943535353535353535353535353535353535353535880de0b6b3a76400008025a028ef61340bd939bc2195fe537567866003e1a15d3c71ff63e1590620aa636276a067cbe9d8997f761aecb703304b3800ccf555c9f3dc64214b297fb1966a3b6d83', $transaction->sign('0x4646464646464646464646464646464646464646464646464646464646464646'));
+
+        $transaction = new Transaction([
+            'nonce' => '0x09',
+            'to' => '0x3535353535353535353535353535353535353535',
+            'gas' => '0x5208',
+            'gasPrice' => '0x4a817c800',
+            'value' => '0x0',
+            'chainId' => '0x1',
+            'data' => ''
+        ]);
+        $this->assertEquals('f864098504a817c800825208943535353535353535353535353535353535353535808025a0855ec9b7d4fcabf535fe4ac4a7c31a9e521214d05bc6efbc058d4757c35e92bba0043d7df30c8a79e5522b3de8fc169df5fa7145714100ee8ec413292d97ce4d3a', $transaction->sign('0x4646464646464646464646464646464646464646464646464646464646464646'));
 
         $transaction = new Transaction([
             'nonce' => '0x09',
@@ -396,7 +407,6 @@ class TransactionTest extends TestCase
             ],
             'data' => ''
         ]);
-        var_dump($transaction->hash());
         $this->assertEquals('02f86c04158504a817c8008504a817c8008252089435353535353535353535353535353535353535358080c080a03fd48c8a173e9669c33cb5271f03b1af4f030dc8315be8ec9442b7fbdde893c8a010af381dab1df3e7012a3c8421d65a810859a5dd9d58991ad7c07f12d0c651c7', $transaction->sign('0x4646464646464646464646464646464646464646464646464646464646464646'));
 
         $transaction = new EIP1559Transaction('0x02f86c04158504a817c8008504a817c8008252089435353535353535353535353535353535353535358080c080a03fd48c8a173e9669c33cb5271f03b1af4f030dc8315be8ec9442b7fbdde893c8a010af381dab1df3e7012a3c8421d65a810859a5dd9d58991ad7c07f12d0c651c7');

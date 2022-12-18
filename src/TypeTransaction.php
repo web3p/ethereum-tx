@@ -39,7 +39,8 @@ class TypeTransaction implements ArrayAccess
             'key' => -1
         ],
         'chainId' => [
-            'key' => 0
+            'key' => 0,
+            'formatInteger' => true
         ],
         'nonce' => [
             'key' => 1,
@@ -83,7 +84,8 @@ class TypeTransaction implements ArrayAccess
         ],
         'v' => [
             'key' => 7,
-            'allowZero' => true
+            'allowZero' => true,
+            'formatInteger' => true
         ],
         'r' => [
             'key' => 8,
@@ -212,7 +214,7 @@ class TypeTransaction implements ArrayAccess
         if (method_exists($this, $method)) {
             return call_user_func_array([$this, $method], [$value]);
         }
-        return $this->offsetSet($name, $value);
+        $this->offsetSet($name, $value);
     }
 
     /**
@@ -284,6 +286,14 @@ class TypeTransaction implements ArrayAccess
                     if (preg_match('/^0*$/', $checkedValue) === 1) {
                         // set value to empty string
                         $value = '';
+                    }
+                }
+                if (isset($txKey['formatInteger']) && $txKey['formatInteger'] === true) {
+                    $bnValue = $this->util->toBn($value);
+                    if (is_array($bnValue)) {
+                        $value = 0;
+                    } else {
+                        $value = (int) $bnValue->toString();
                     }
                 }
             }

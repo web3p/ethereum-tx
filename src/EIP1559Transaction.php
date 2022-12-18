@@ -71,7 +71,8 @@ class EIP1559Transaction extends TypeTransaction
             'key' => -1
         ],
         'chainId' => [
-            'key' => 0
+            'key' => 0,
+            'formatInteger' => true
         ],
         'nonce' => [
             'key' => 1,
@@ -127,7 +128,8 @@ class EIP1559Transaction extends TypeTransaction
         ],
         'v' => [
             'key' => 9,
-            'allowZero' => true
+            'allowZero' => true,
+            'formatInteger' => true
         ],
         'r' => [
             'key' => 10,

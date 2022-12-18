@@ -70,7 +70,8 @@ class EIP2930Transaction extends TypeTransaction
             'key' => -1
         ],
         'chainId' => [
-            'key' => 0
+            'key' => 0,
+            'formatInteger' => true
         ],
         'nonce' => [
             'key' => 1,
@@ -120,7 +121,8 @@ class EIP2930Transaction extends TypeTransaction
         ],
         'v' => [
             'key' => 8,
-            'allowZero' => true
+            'allowZero' => true,
+            'formatInteger' => true
         ],
         'r' => [
             'key' => 9,

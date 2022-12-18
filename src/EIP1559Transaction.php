@@ -162,7 +162,7 @@ class EIP1559Transaction extends TypeTransaction
     /**
      * RLP serialize the ethereum transaction.
      * 
-     * @return \Web3p\RLP\RLP\Buffer serialized ethereum transaction
+     * @return string hex encoded of the serialized ethereum transaction
      */
     public function serialize()
     {

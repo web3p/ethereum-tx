@@ -227,9 +227,10 @@ class Transaction implements ArrayAccess
         $method = 'set' . ucfirst($name);
 
         if (method_exists($this, $method)) {
-            return call_user_func_array([$this, $method], [$value]);
+            call_user_func_array([$this, $method], [$value]);
+            return;
         }
-        return $this->offsetSet($name, $value);
+        $this->offsetSet($name, $value);
     }
 
     /**
@@ -244,12 +245,12 @@ class Transaction implements ArrayAccess
 
     /**
      * Set the value in the transaction with given key.
-     * 
-     * @param string $offset key, eg: to
-     * @param string value
+     *
+     * @param mixed $offset key, eg: to
+     * @param mixed $value
      * @return void
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
@@ -285,11 +286,11 @@ class Transaction implements ArrayAccess
 
     /**
      * Return whether the value is in the transaction with given key.
-     * 
-     * @param string $offset key, eg: to
+     *
+     * @param mixed $offset key, eg: to
      * @return bool
      */
-    public function offsetExists($offset)
+    public function offsetExists(mixed $offset): bool
     {
         $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
@@ -301,11 +302,11 @@ class Transaction implements ArrayAccess
 
     /**
      * Unset the value in the transaction with given key.
-     * 
-     * @param string $offset key, eg: to
+     *
+     * @param mixed $offset key, eg: to
      * @return void
      */
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset): void
     {
         $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
@@ -316,11 +317,11 @@ class Transaction implements ArrayAccess
 
     /**
      * Return the value in the transaction with given key.
-     * 
-     * @param string $offset key, eg: to 
+     *
+     * @param mixed $offset key, eg: to
      * @return mixed value of the transaction
      */
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
         $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 

@@ -147,7 +147,7 @@ class TypeTransaction implements ArrayAccess
      */
     public function __construct($txData=[])
     {
-        $this->rlp = new RLP;
+        $this->rlp = new RLPEncoder;
         $this->secp256k1 = new EC('secp256k1');
         $this->util = new Util;
 
@@ -360,6 +360,22 @@ class TypeTransaction implements ArrayAccess
     }
 
     /**
+     * Return keys of byte-string fields, which must keep their leading zero bytes when RLP encoded.
+     *
+     * @return array keys of byte-string fields
+     */
+    protected function getByteFieldKeys()
+    {
+        $keys = [];
+        foreach (['to', 'data', 'accessList'] as $name) {
+            if (isset($this->attributeMap[$name])) {
+                $keys[] = $this->attributeMap[$name]['key'];
+            }
+        }
+        return $keys;
+    }
+
+    /**
      * RLP serialize the ethereum transaction.
      * 
      * @return string hex encoded of the serialized ethereum transaction
@@ -377,7 +393,7 @@ class TypeTransaction implements ArrayAccess
             }
         }
         $transactionType = $this->transactionType;
-        return $transactionType . $this->rlp->encode($txData);
+        return $transactionType . $this->rlp->encodeList($txData, $this->getByteFieldKeys());
     }
 
     /**
@@ -433,7 +449,7 @@ class TypeTransaction implements ArrayAccess
                 $rawTxData[$key] = $this->txData[$key];
             }
         }
-        $serializedTx = $this->rlp->encode($rawTxData);
+        $serializedTx = $this->rlp->encodeList($rawTxData, $this->getByteFieldKeys());
         $transactionType = $this->transactionType;
         return $this->util->sha3(hex2bin($transactionType . $serializedTx));
     }

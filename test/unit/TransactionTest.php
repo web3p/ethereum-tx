@@ -403,4 +403,65 @@ class TransactionTest extends TestCase
         $this->assertEquals('02f86c04158504a817c8008504a817c8008252089435353535353535353535353535353535353535358080c080a03fd48c8a173e9669c33cb5271f03b1af4f030dc8315be8ec9442b7fbdde893c8a010af381dab1df3e7012a3c8421d65a810859a5dd9d58991ad7c07f12d0c651c7', $transaction->serialize());
         $this->assertEquals('02f86c04158504a817c8008504a817c8008252089435353535353535353535353535353535353535358080c080a03fd48c8a173e9669c33cb5271f03b1af4f030dc8315be8ec9442b7fbdde893c8a010af381dab1df3e7012a3c8421d65a810859a5dd9d58991ad7c07f12d0c651c7', $transaction->sign('0x4646464646464646464646464646464646464646464646464646464646464646'));
     }
+
+    /**
+     * testLeadingZeroBytes
+     * Byte-string fields (to, data, access list) must keep their leading zero bytes.
+     * Expected values were generated with foundry `cast to-rlp` and `cast keccak`.
+     *
+     * @return void
+     */
+    public function testLeadingZeroBytes()
+    {
+        $to = '0x0035353535353535353535353535353535353535';
+        $data = '0x0000a9059cbb';
+        $accessList = [
+            [
+                '0x0035353535353535353535353535353535353535',
+                [
+                    '0x0000000000000000000000000000000000000000000000000000000000000007',
+                    '0x0000000000000000000000000000000000000000000000000000000000000000'
+                ]
+            ]
+        ];
+
+        $transaction = new Transaction([
+            'nonce' => '0x09',
+            'to' => $to,
+            'gas' => '0x5208',
+            'gasPrice' => '0x04a817c800',
+            'value' => '0x0de0b6b3a7640000',
+            'chainId' => 1,
+            'data' => $data
+        ]);
+        $this->assertEquals('f2098504a817c800825208940035353535353535353535353535353535353535880de0b6b3a7640000860000a9059cbb808080', $transaction->serialize());
+        $this->assertEquals('6d1fa06d5109093e8cb8f87ee31eaf089cd0e08bc9b518c571fc05318c9e9729', $transaction->hash(false));
+
+        $transaction = new EIP2930Transaction([
+            'nonce' => '0x09',
+            'to' => $to,
+            'gas' => '0x5208',
+            'gasPrice' => '0x04a817c800',
+            'value' => '0x0de0b6b3a7640000',
+            'chainId' => 1,
+            'accessList' => $accessList,
+            'data' => $data
+        ]);
+        $this->assertEquals('01f89001098504a817c800825208940035353535353535353535353535353535353535880de0b6b3a7640000860000a9059cbbf85bf859940035353535353535353535353535353535353535f842a00000000000000000000000000000000000000000000000000000000000000007a00000000000000000000000000000000000000000000000000000000000000000808080', $transaction->serialize());
+        $this->assertEquals('24aeea95a6fdb9b495f3e2f362b9f9067efb91719cde947758edac95563371a7', $transaction->hash(false));
+
+        $transaction = new EIP1559Transaction([
+            'nonce' => '0x09',
+            'to' => $to,
+            'gas' => '0x5208',
+            'maxPriorityFeePerGas' => '0x04a817c800',
+            'maxFeePerGas' => '0x04a817c800',
+            'value' => '0x0de0b6b3a7640000',
+            'chainId' => 1,
+            'accessList' => $accessList,
+            'data' => $data
+        ]);
+        $this->assertEquals('02f89601098504a817c8008504a817c800825208940035353535353535353535353535353535353535880de0b6b3a7640000860000a9059cbbf85bf859940035353535353535353535353535353535353535f842a00000000000000000000000000000000000000000000000000000000000000007a00000000000000000000000000000000000000000000000000000000000000000808080', $transaction->serialize());
+        $this->assertEquals('cf426c76d5f397992f590e04f0c100492f91e8f48a01f2b56ca76eabce46d507', $transaction->hash(false));
+    }
 }

@@ -177,7 +177,7 @@ class EIP1559Transaction extends TypeTransaction
             }
         }
         $transactionType = $this->transactionType;
-        return $transactionType . $this->rlp->encode($txData);
+        return $transactionType . $this->rlp->encodeList($txData, $this->getByteFieldKeys());
     }
 
     /**
@@ -233,7 +233,7 @@ class EIP1559Transaction extends TypeTransaction
                 $rawTxData[$key] = $this->txData[$key];
             }
         }
-        $serializedTx = $this->rlp->encode($rawTxData);
+        $serializedTx = $this->rlp->encodeList($rawTxData, $this->getByteFieldKeys());
         $transactionType = $this->transactionType;
         return $this->util->sha3(hex2bin($transactionType . $serializedTx));
     }

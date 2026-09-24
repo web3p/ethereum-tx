@@ -360,6 +360,34 @@ class TypeTransaction implements ArrayAccess
     }
 
     /**
+     * Return tx data with leading zeros removed from hex encoded integer fields, so they are RLP encoded as integers.
+     * Byte-string fields (to, data, accessList) keep their leading zero bytes.
+     *
+     * @param array $txData tx data
+     * @return array tx data
+     */
+    protected function trimIntegerFields(array $txData)
+    {
+        foreach (['chainId', 'nonce', 'gasPrice', 'maxPriorityFeePerGas', 'maxFeePerGas', 'gasLimit', 'value', 'v', 'r', 's'] as $name) {
+            if (!isset($this->attributeMap[$name])) {
+                continue;
+            }
+            $key = $this->attributeMap[$name]['key'];
+
+            if (isset($txData[$key]) && is_string($txData[$key]) && strpos($txData[$key], '0x') === 0) {
+                $hex = substr($txData[$key], 2);
+
+                // same as web3p/rlp 0.3.5, one byte values are kept as they are
+                if (strlen($hex) > 2) {
+                    $hex = ltrim($hex, '0');
+                }
+                $txData[$key] = '0x' . $hex;
+            }
+        }
+        return $txData;
+    }
+
+    /**
      * RLP serialize the ethereum transaction.
      * 
      * @return string hex encoded of the serialized ethereum transaction
@@ -377,7 +405,7 @@ class TypeTransaction implements ArrayAccess
             }
         }
         $transactionType = $this->transactionType;
-        return $transactionType . $this->rlp->encode($txData);
+        return $transactionType . $this->rlp->encode($this->trimIntegerFields($txData));
     }
 
     /**
@@ -433,7 +461,7 @@ class TypeTransaction implements ArrayAccess
                 $rawTxData[$key] = $this->txData[$key];
             }
         }
-        $serializedTx = $this->rlp->encode($rawTxData);
+        $serializedTx = $this->rlp->encode($this->trimIntegerFields($rawTxData));
         $transactionType = $this->transactionType;
         return $this->util->sha3(hex2bin($transactionType . $serializedTx));
     }

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(composer install:*)",
+      "Bash(composer validate:*)",
+      "Bash(vendor/bin/phpunit:*)",
+      "Bash(php -l:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git grep:*)"
+    ],
+    "deny": [
+      "Bash(git push:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean:*)",
+      "Bash(rm -rf:*)"
+    ]
+  }
+}

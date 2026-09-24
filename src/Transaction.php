@@ -341,6 +341,31 @@ class Transaction implements ArrayAccess
     }
 
     /**
+     * Return tx data with leading zeros removed from hex encoded integer fields, so they are RLP encoded as integers.
+     * Byte-string fields (to, data) keep their leading zero bytes.
+     *
+     * @param array $txData tx data
+     * @return array tx data
+     */
+    protected function trimIntegerFields(array $txData)
+    {
+        foreach (['chainId', 'nonce', 'gasPrice', 'gasLimit', 'value', 'v', 'r', 's'] as $name) {
+            $key = $this->attributeMap[$name]['key'];
+
+            if (isset($txData[$key]) && is_string($txData[$key]) && strpos($txData[$key], '0x') === 0) {
+                $hex = substr($txData[$key], 2);
+
+                // same as web3p/rlp 0.3.5, one byte values are kept as they are
+                if (strlen($hex) > 2) {
+                    $hex = ltrim($hex, '0');
+                }
+                $txData[$key] = '0x' . $hex;
+            }
+        }
+        return $txData;
+    }
+
+    /**
      * RLP serialize the ethereum transaction.
      * 
      * @return string hex encoded of the serialized ethereum transaction
@@ -363,7 +388,7 @@ class Transaction implements ArrayAccess
                 $txData[$key] = $data;
             }
         }
-        return $this->rlp->encode($txData);
+        return $this->rlp->encode($this->trimIntegerFields($txData));
     }
 
     /**
@@ -438,7 +463,7 @@ class Transaction implements ArrayAccess
             }
             $this->txData = $rawTxData;
         }
-        $serializedTx = $this->rlp->encode($txData);
+        $serializedTx = $this->rlp->encode($this->trimIntegerFields($txData));
 
         return $this->util->sha3(hex2bin($serializedTx));
     }

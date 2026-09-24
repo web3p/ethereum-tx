@@ -464,4 +464,75 @@ class TransactionTest extends TestCase
         $this->assertEquals('02f89601098504a817c8008504a817c800825208940035353535353535353535353535353535353535880de0b6b3a7640000860000a9059cbbf85bf859940035353535353535353535353535353535353535f842a00000000000000000000000000000000000000000000000000000000000000007a00000000000000000000000000000000000000000000000000000000000000000808080', $transaction->serialize());
         $this->assertEquals('cf426c76d5f397992f590e04f0c100492f91e8f48a01f2b56ca76eabce46d507', $transaction->hash(false));
     }
+
+    /**
+     * testIntegerLeadingZeros
+     * Hex encoded integer fields with leading zeros must be encoded as canonical integers.
+     *
+     * @return void
+     */
+    public function testIntegerLeadingZeros()
+    {
+        $tests = [
+            [Transaction::class, [
+                'nonce' => '0x09', 'gas' => '0x5208', 'gasPrice' => '0x4a817c800', 'value' => '0x01', 'chainId' => 1
+            ], [
+                'nonce' => '0x0009', 'gas' => '0x005208', 'gasPrice' => '0x0004a817c800', 'value' => '0x0001', 'chainId' => 1
+            ]],
+            [EIP2930Transaction::class, [
+                'nonce' => '0x09', 'gas' => '0x5208', 'gasPrice' => '0x4a817c800', 'value' => '0x01', 'chainId' => '0x01'
+            ], [
+                'nonce' => '0x0009', 'gas' => '0x005208', 'gasPrice' => '0x0004a817c800', 'value' => '0x0001', 'chainId' => '0x0001'
+            ]],
+            [EIP1559Transaction::class, [
+                'nonce' => '0x09', 'gas' => '0x5208', 'maxPriorityFeePerGas' => '0x4a817c800', 'maxFeePerGas' => '0x4a817c800', 'value' => '0x01', 'chainId' => '0x01'
+            ], [
+                'nonce' => '0x0009', 'gas' => '0x005208', 'maxPriorityFeePerGas' => '0x0004a817c800', 'maxFeePerGas' => '0x0004a817c800', 'value' => '0x0001', 'chainId' => '0x0001'
+            ]]
+        ];
+        $common = [
+            'to' => '0x3535353535353535353535353535353535353535',
+            'accessList' => [],
+            'data' => ''
+        ];
+        foreach ($tests as $test) {
+            list($class, $canonical, $padded) = $test;
+            $expected = new $class(array_merge($common, $canonical));
+            $transaction = new $class(array_merge($common, $padded));
+
+            $this->assertEquals($expected->serialize(), $transaction->serialize());
+            $this->assertEquals($expected->hash(false), $transaction->hash(false));
+            $this->assertEquals($expected->sign('0x4646464646464646464646464646464646464646464646464646464646464646'), $transaction->sign('0x4646464646464646464646464646464646464646464646464646464646464646'));
+        }
+    }
+
+    /**
+     * testInvalidValue
+     * Invalid hex strings and numbers throw instead of being encoded as invalid data.
+     *
+     * @return void
+     */
+    public function testInvalidValue()
+    {
+        $tests = [
+            ['data' => '0xzz'],
+            ['value' => -1],
+            ['value' => 1.5]
+        ];
+        foreach ($tests as $test) {
+            $transaction = new Transaction(array_merge([
+                'nonce' => '0x09',
+                'to' => '0x3535353535353535353535353535353535353535',
+                'gas' => '0x5208',
+                'gasPrice' => '0x4a817c800',
+                'chainId' => 1
+            ], $test));
+            try {
+                $transaction->serialize();
+                $this->fail('Expected InvalidArgumentException for ' . json_encode($test));
+            } catch (\InvalidArgumentException $e) {
+                $this->assertInstanceOf(\InvalidArgumentException::class, $e);
+            }
+        }
+    }
 }

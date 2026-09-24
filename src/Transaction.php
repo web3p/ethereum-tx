@@ -169,7 +169,7 @@ class Transaction implements ArrayAccess
      */
     public function __construct($txData=[])
     {
-        $this->rlp = new RLPEncoder;
+        $this->rlp = new RLP;
         $this->secp256k1 = new EC('secp256k1');
         $this->util = new Util;
 
@@ -341,16 +341,28 @@ class Transaction implements ArrayAccess
     }
 
     /**
-     * Return keys of byte-string fields, which must keep their leading zero bytes when RLP encoded.
+     * Return tx data with leading zeros removed from hex encoded integer fields, so they are RLP encoded as integers.
+     * Byte-string fields (to, data) keep their leading zero bytes.
      *
-     * @return array keys of byte-string fields
+     * @param array $txData tx data
+     * @return array tx data
      */
-    protected function getByteFieldKeys()
+    protected function trimIntegerFields(array $txData)
     {
-        return [
-            $this->attributeMap['to']['key'],
-            $this->attributeMap['data']['key']
-        ];
+        foreach (['chainId', 'nonce', 'gasPrice', 'gasLimit', 'value', 'v', 'r', 's'] as $name) {
+            $key = $this->attributeMap[$name]['key'];
+
+            if (isset($txData[$key]) && is_string($txData[$key]) && strpos($txData[$key], '0x') === 0) {
+                $hex = substr($txData[$key], 2);
+
+                // same as web3p/rlp 0.3.5, one byte values are kept as they are
+                if (strlen($hex) > 2) {
+                    $hex = ltrim($hex, '0');
+                }
+                $txData[$key] = '0x' . $hex;
+            }
+        }
+        return $txData;
     }
 
     /**
@@ -376,7 +388,7 @@ class Transaction implements ArrayAccess
                 $txData[$key] = $data;
             }
         }
-        return $this->rlp->encodeList($txData, $this->getByteFieldKeys());
+        return $this->rlp->encode($this->trimIntegerFields($txData));
     }
 
     /**
@@ -451,7 +463,7 @@ class Transaction implements ArrayAccess
             }
             $this->txData = $rawTxData;
         }
-        $serializedTx = $this->rlp->encodeList($txData, $this->getByteFieldKeys());
+        $serializedTx = $this->rlp->encode($this->trimIntegerFields($txData));
 
         return $this->util->sha3(hex2bin($serializedTx));
     }

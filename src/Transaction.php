@@ -249,7 +249,7 @@ class Transaction implements ArrayAccess
      * @param string value
      * @return void
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
@@ -289,7 +289,8 @@ class Transaction implements ArrayAccess
      * @param string $offset key, eg: to
      * @return bool
      */
-    public function offsetExists($offset)
+    #[\ReturnTypeWillChange]
+    public function offsetExists($offset):bool
     {
         $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
@@ -305,7 +306,7 @@ class Transaction implements ArrayAccess
      * @param string $offset key, eg: to
      * @return void
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset):void
     {
         $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
@@ -320,7 +321,7 @@ class Transaction implements ArrayAccess
      * @param string $offset key, eg: to 
      * @return mixed value of the transaction
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset):mixed
     {
         $txKey = isset($this->attributeMap[$offset]) ? $this->attributeMap[$offset] : null;
 
